@@ -10,17 +10,23 @@ namespace Drjele\DoctrineAudit\Auditor;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
+use Drjele\DoctrineAudit\Service\AnnotationService;
 
 final class Auditor
 {
     private EntityManagerInterface $entityManager;
-    private array $entites;
     private StorageInterface $storage;
+    private array $entites;
 
-    public function __construct(EntityManagerInterface $entityManager, array $entites, StorageInterface $storage)
-    {
+    public function __construct(
+        AnnotationService $annotationService,
+        EntityManagerInterface $entityManager,
+        StorageInterface $storage
+    ) {
         $this->entityManager = $entityManager;
-        $this->entites = $entites;
         $this->storage = $storage;
+
+        /* @todo do not init on constructor */
+        $this->entites = $annotationService->read($entityManager);
     }
 }

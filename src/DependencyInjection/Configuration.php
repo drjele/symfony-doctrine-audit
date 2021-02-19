@@ -34,6 +34,7 @@ class Configuration implements ConfigurationInterface
             ->prototype('array')
             ->children()
             ->scalarNode('name')->end()
+            ->scalarNode('entity_manager')->end()
             ->scalarNode('storage')->end();
     }
 }
