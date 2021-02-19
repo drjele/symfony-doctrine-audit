@@ -1,1 +1,4 @@
-services: ~
+services:
+    Drjele\DoctrineAudit\EventSubscriber\DoctrineSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber }

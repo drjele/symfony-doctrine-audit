@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -17,9 +18,22 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('drjele_doctrine_audit');
 
-        $treeBuilder->getRootNode()
+        $root = $treeBuilder->getRootNode()
             ->children();
 
+        $this->attachAuditors($root);
+
         return $treeBuilder;
+    }
+
+    private function attachAuditors(NodeBuilder $root): void
+    {
+        $root->arrayNode('auditors')->isRequired()
+            ->cannotBeEmpty()
+            ->useAttributeAsKey('name')
+            ->prototype('array')
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('storage')->end();
     }
 }
