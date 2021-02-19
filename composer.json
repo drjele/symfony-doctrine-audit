@@ -1,0 +1,60 @@
+{
+    "name": "drjele/doctrine-audit",
+    "type": "library",
+    "description": "Doctrine audit library",
+    "keywords": [
+        "doctrine",
+        "symfony",
+        "audit"
+    ],
+    "homepage": "https://gitlab.com/drjele-symfony/doctrine-audit",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Adrian Jeledintan",
+            "email": "adrian.jeledintan@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4",
+        "symfony/dependency-injection": "^4.0|^5.0",
+        "symfony/console": "^4.0|^5.0",
+        "symfony/filesystem": "^4.0|^5.0",
+        "symfony/http-kernel": "^4.0|^5.0",
+        "symfony/config": "^4.0|^5.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "squizlabs/php_codesniffer": "^3.5",
+        "drjele/symfony-phpunit": "^1.0"
+    },
+    "repositories": [
+    ],
+    "autoload": {
+        "psr-4": {
+            "Drjele\\DoctrineAudit\\": "src/"
+        }
+    },
+    "scripts": {
+        "install-hooks": [
+            "[ $COMPOSER_DEV_MODE -eq 1 ] && rm -rf .git/hooks && ln -s ../scripts/git_hooks .git/hooks || exit 0"
+        ],
+        "post-install-cmd": [
+            "@install-hooks"
+        ],
+        "post-update-cmd": [
+            "@install-hooks"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "extra": {
+        "exclude": [
+            "/scripts",
+            "/tests",
+            "/.php_cs.dist",
+            "/phpcs.xml.dist",
+            "/phpunit.xml.dist"
+        ]
+    }
+}

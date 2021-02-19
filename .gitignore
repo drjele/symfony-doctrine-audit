@@ -1,0 +1,16 @@
+###> generic ###
+/vendor/
+/.idea/
+/auth.json
+###> generic ###
+
+###> squizlabs php codesniffer ###
+/.phpcs-cache
+/phpcs.xml
+###< squizlabs php codesniffer ###
+
+###> symfony phpunit bridge ###
+/.phpunit
+/.phpunit.result.cache
+/phpunit.xml
+###< symfony phpunit bridge ###
