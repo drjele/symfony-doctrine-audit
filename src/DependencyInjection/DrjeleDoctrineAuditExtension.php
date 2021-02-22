@@ -35,8 +35,7 @@ class DrjeleDoctrineAuditExtension extends Extension
 
     private function attachAuditors(ContainerBuilder $container, array $auditors): void
     {
-        foreach ($auditors as $auditor) {
-            $name = $auditor['name'];
+        foreach ($auditors as $name => $auditor) {
             $entityManagerName = $auditor['entity_manager'];
             $storage = $auditor['storage'];
 
@@ -48,6 +47,8 @@ class DrjeleDoctrineAuditExtension extends Extension
                     new Reference($storage),
                 ]
             );
+
+            $definition->addTag('doctrine.event_subscriber', ['connection' => 'default']);
 
             $id = \sprintf('drjele_doctrine_audit.auditor.%s', $name);
 
