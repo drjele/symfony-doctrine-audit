@@ -48,6 +48,7 @@ class DrjeleDoctrineAuditExtension extends Extension
                 ]
             );
 
+            /* @todo add connection to em */
             $definition->addTag('doctrine.event_subscriber', ['connection' => 'default']);
 
             $id = \sprintf('drjele_doctrine_audit.auditor.%s', $name);

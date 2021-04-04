@@ -61,6 +61,7 @@ final class Auditor implements EventSubscriber
         static $entities = null;
 
         if (null !== $entities) {
+            /** @todo cache this on compiler pass */
             $entities = $this->annotationService->read($this->entityManager);
         }
 
