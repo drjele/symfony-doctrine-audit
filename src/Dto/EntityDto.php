@@ -15,27 +15,20 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto;
 
-class AnnotationDto
+class EntityDto
 {
     private string $entity;
-    private bool $enabled;
     private array $ignoredColumns;
 
-    public function __construct(string $entity, bool $enabled, array $ignoredColumns)
+    public function __construct(string $entity, array $ignoredColumns)
     {
         $this->entity = $entity;
-        $this->enabled = $enabled;
         $this->ignoredColumns = $ignoredColumns;
     }
 
     public function getEntity(): ?string
     {
         return $this->entity;
-    }
-
-    public function getEnabled(): ?bool
-    {
-        return $this->enabled;
     }
 
     public function getIgnoredColumns(): ?array

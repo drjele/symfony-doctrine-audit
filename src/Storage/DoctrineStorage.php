@@ -9,7 +9,12 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Storage;
 
 use Drjele\DoctrineAudit\Contract\StorageInterface;
+use Drjele\DoctrineAudit\Dto\Revision\RevisionDto;
 
 class DoctrineStorage implements StorageInterface
 {
+    public function save(RevisionDto $revisionDto): void
+    {
+        /* @todo implement method */
+    }
 }

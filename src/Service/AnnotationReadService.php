@@ -21,10 +21,10 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Drjele\DoctrineAudit\Annotation\Auditable;
 use Drjele\DoctrineAudit\Annotation\Ignore;
-use Drjele\DoctrineAudit\Dto\AnnotationDto;
+use Drjele\DoctrineAudit\Dto\EntityDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 
-class AnnotationService
+class AnnotationReadService
 {
     private AnnotationReader $reader;
 
@@ -60,33 +60,37 @@ class AnnotationService
         return $annotations;
     }
 
-    private function buildAnnotationDto(ClassMetadata $metadata): ?AnnotationDto
+    private function buildAnnotationDto(ClassMetadata $metadata): ?EntityDto
     {
         $reflection = $metadata->getReflectionClass();
 
         $annotation = $this->reader->getClassAnnotation($reflection, Entity::class);
         if (null === $annotation) {
+            /* ignore non entity */
             return null;
         }
 
-        /** @var ?Auditable $auditableAnnotation */
+        /** @var Auditable $auditableAnnotation */
         $auditableAnnotation = $this->reader->getClassAnnotation($reflection, Auditable::class);
         if (null === $auditableAnnotation) {
+            /* ignore not auditable entity */
+            return null;
+        }
+
+        if (false === $auditableAnnotation->enabled) {
             return null;
         }
 
         $ignoredColumns = [];
 
         foreach ($reflection->getProperties() as $property) {
+            /* @todo add global ignore columns config */
+
             if ($this->reader->getPropertyAnnotation($property, Ignore::class)) {
                 $ignoredColumns[] = $property->getName();
             }
         }
 
-        return new AnnotationDto(
-            $metadata->getName(),
-            $auditableAnnotation->enabled,
-            $ignoredColumns
-        );
+        return new EntityDto($metadata->getName(), $ignoredColumns);
     }
 }

@@ -3,6 +3,6 @@ services:
         tags:
             - { name: doctrine.event_subscriber }
 
-    Drjele\DoctrineAudit\Service\AnnotationService: ~
+    Drjele\DoctrineAudit\Service\AnnotationReadService: ~
 
     Drjele\DoctrineAudit\Storage\DoctrineStorage: ~

@@ -6,8 +6,8 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Auditor;
+namespace Drjele\DoctrineAudit\Dto\Revision;
 
-final class Auditor
+class EntityDto
 {
 }

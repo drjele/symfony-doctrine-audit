@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\DependencyInjection;
 
 use Drjele\DoctrineAudit\Auditor\Auditor;
-use Drjele\DoctrineAudit\Service\AnnotationService;
+use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -42,18 +42,29 @@ class DrjeleDoctrineAuditExtension extends Extension
             $definition = new Definition(
                 Auditor::class,
                 [
-                    new Reference(AnnotationService::class),
-                    new Reference($entityManagerName),
+                    new Reference(AnnotationReadService::class),
+                    $this->getEntityManager($entityManagerName),
                     new Reference($storage),
                 ]
             );
 
-            /* @todo add connection to em */
-            $definition->addTag('doctrine.event_subscriber', ['connection' => 'default']);
+            $definition->addTag(
+                'doctrine.event_subscriber',
+                [
+                    'connection' => $auditor['connection'] ?? $auditor['entity_manager'],
+                ]
+            );
 
             $id = \sprintf('drjele_doctrine_audit.auditor.%s', $name);
 
             $container->setDefinition($id, $definition);
         }
+    }
+
+    private function getEntityManager(string $name): Reference
+    {
+        $entityManagerName = \sprintf('doctrine.orm.%s_entity_manager', $name);
+
+        return new Reference($entityManagerName);
     }
 }

@@ -21,9 +21,17 @@ class Configuration implements ConfigurationInterface
         $root = $treeBuilder->getRootNode()
             ->children();
 
+        $this->attachStorages($root);
+
         $this->attachAuditors($root);
 
         return $treeBuilder;
+    }
+
+    private function attachStorages(NodeBuilder $root): void
+    {
+        $root->arrayNode('storages')->isRequired()
+            ->cannotBeEmpty();
     }
 
     private function attachAuditors(NodeBuilder $root): void

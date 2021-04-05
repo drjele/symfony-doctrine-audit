@@ -12,8 +12,4 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class DrjeleDoctrineAuditBundle extends Bundle
 {
-    public function boot()
-    {
-        parent::boot();
-    }
 }
