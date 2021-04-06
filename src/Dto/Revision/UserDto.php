@@ -8,11 +8,12 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto\Revision;
 
+/** @todo add the option of extra data */
 class UserDto
 {
-    private int $userId;
+    private ?int $userId;
 
-    public function __construct(int $userId)
+    public function __construct(?int $userId)
     {
         $this->userId = $userId;
     }

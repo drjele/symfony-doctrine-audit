@@ -8,41 +8,26 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto\Revision;
 
+/** @info this and all of its children should be read only */
 class RevisionDto
 {
-    private UserDto $user;
-    private array $deletions;
-    private array $insertions;
-    private array $updates;
+    private UserDto $userDto;
+    private array $entities;
 
-    public function __construct(UserDto $user, array $deletions, array $insertions, array $updates)
+    public function __construct(UserDto $userDto, array $entities)
     {
-        $this->user = $user;
-        $this->deletions = $deletions;
-        $this->insertions = $insertions;
-        $this->updates = $updates;
+        $this->userDto = $userDto;
+        $this->entities = $entities;
     }
 
-    public function getUser(): ?UserDto
+    public function getUserDto(): ?UserDto
     {
-        return $this->user;
+        return $this->userDto;
     }
 
     /** @return EntityDto[] */
-    public function getDeletions(): ?array
+    public function getEntities(): ?array
     {
-        return $this->deletions;
-    }
-
-    /** @return EntityDto[] */
-    public function getInsertions(): ?array
-    {
-        return $this->insertions;
-    }
-
-    /** @return EntityDto[] */
-    public function getUpdates(): ?array
-    {
-        return $this->updates;
+        return $this->entities;
     }
 }

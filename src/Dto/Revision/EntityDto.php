@@ -10,15 +10,16 @@ namespace Drjele\DoctrineAudit\Dto\Revision;
 
 class EntityDto
 {
-    private $entity;
+    use EntityDtoTrait;
 
-    public function __construct($entity)
-    {
-        $this->entity = $entity;
-    }
+    public const OPERATION_DELETE = 'delete';
+    public const OPERATION_INSERT = 'insert';
+    public const OPERATION_UPDATE = 'update';
 
-    public function getEntity()
+    public function __construct(string $operation, string $class, array $columns)
     {
-        return $this->entity;
+        $this->operation = $operation;
+        $this->class = $class;
+        $this->columns = $columns;
     }
 }

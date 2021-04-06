@@ -21,7 +21,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Drjele\DoctrineAudit\Annotation\Auditable;
 use Drjele\DoctrineAudit\Annotation\Ignore;
-use Drjele\DoctrineAudit\Dto\EntityDto;
+use Drjele\DoctrineAudit\Dto\Annotation\EntityDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 
 class AnnotationReadService
@@ -35,32 +35,32 @@ class AnnotationReadService
 
     public function read(EntityManagerInterface $entityManager): array
     {
-        $annotations = [];
+        $entities = [];
 
         $metadatas = $entityManager->getMetadataFactory()->getAllMetadata();
 
         foreach ($metadatas as $metadata) {
-            $annotationDto = $this->buildAnnotationDto($metadata);
+            $entityDto = $this->buildEntityDto($metadata);
 
-            if (null === $annotationDto) {
+            if (null === $entityDto) {
                 continue;
             }
 
-            $class = $metadata->getName();
+            $entityClass = $entityDto->getClass();
 
-            if (isset($annotations[$class])) {
+            if (isset($entities[$entityClass])) {
                 throw new Exception(
-                    \sprintf('duplicate annotation for class "%s"', $class)
+                    \sprintf('duplicate annotation for entity class "%s"', $entityClass)
                 );
             }
 
-            $annotations[$metadata->getName()] = $annotationDto;
+            $entities[$entityClass] = $entityDto;
         }
 
-        return $annotations;
+        return $entities;
     }
 
-    private function buildAnnotationDto(ClassMetadata $metadata): ?EntityDto
+    private function buildEntityDto(ClassMetadata $metadata): ?EntityDto
     {
         $reflection = $metadata->getReflectionClass();
 

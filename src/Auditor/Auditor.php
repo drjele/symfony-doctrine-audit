@@ -15,6 +15,8 @@ use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Contract\UserProviderInterface;
+use Drjele\DoctrineAudit\Dto\Auditor\AuditorDto;
+use Drjele\DoctrineAudit\Dto\Auditor\EntityDto as AuditorEntityDto;
 use Drjele\DoctrineAudit\Dto\Revision\EntityDto;
 use Drjele\DoctrineAudit\Dto\Revision\RevisionDto;
 use Drjele\DoctrineAudit\Exception\Exception;
@@ -24,14 +26,14 @@ use Throwable;
 
 final class Auditor implements EventSubscriber
 {
-    private array $entities;
+    private array $auditedEntities;
     private EntityManagerInterface $entityManager;
     private StorageInterface $storage;
     private UserProviderInterface $userProvider;
     private ?LoggerInterface $logger;
 
     /** processing data */
-    private ?RevisionDto $revisionDto = null;
+    private ?AuditorDto $auditorDto = null;
 
     public function __construct(
         AnnotationReadService $annotationReadService,
@@ -41,7 +43,7 @@ final class Auditor implements EventSubscriber
         ?LoggerInterface $logger
     ) {
         /* @todo read and set entities on cache create */
-        $this->entities = $annotationReadService->read($entityManager);
+        $this->auditedEntities = $annotationReadService->read($entityManager);
         $this->entityManager = $entityManager;
         $this->storage = $storage;
         $this->userProvider = $userProvider;
@@ -55,23 +57,23 @@ final class Auditor implements EventSubscriber
 
     public function onFlush(OnFlushEventArgs $eventArgs): void
     {
-        /* @todo compute updates change set here */
+        /* @todo compute updates revisions somewhere */
 
         try {
-            $deletions = $this->getScheduledEntityDeletions();
+            $unitOfWork = $this->entityManager->getUnitOfWork();
 
-            /** @todo compute deletions change set here */
-            $insertions = $this->getScheduledEntityInsertions();
+            /** @todo compute deletions revisions here */
+            $entitiesToDelete = $this->filterAuditedEntities($unitOfWork->getScheduledEntityDeletions());
 
-            $updates = $this->getScheduledEntityUpdates();
+            $entitiesToInsert = $this->filterAuditedEntities($unitOfWork->getScheduledEntityInsertions());
 
-            if (!$deletions && !$insertions && !$updates) {
+            $entitiesToUpdate = $this->filterAuditedEntities($unitOfWork->getScheduledEntityUpdates());
+
+            if (!$entitiesToDelete && !$entitiesToInsert && !$entitiesToUpdate) {
                 return;
             }
 
-            $userDto = $this->userProvider->getUser();
-
-            $this->revisionDto = new RevisionDto($userDto, $deletions, $insertions, $updates);
+            $this->auditorDto = new AuditorDto($entitiesToDelete, $entitiesToInsert, $entitiesToUpdate);
         } catch (Throwable $t) {
             $this->handleThrowable($t);
         }
@@ -80,71 +82,56 @@ final class Auditor implements EventSubscriber
     public function postFlush(PostFlushEventArgs $eventArgs): void
     {
         try {
-            if (null === $this->revisionDto) {
+            if (null === $this->auditorDto) {
                 return;
             }
 
-            /* @todo compute insertions change set here */
+            /** @todo compute insertions revisions here */
+            $revisonDto = $this->createRevisonDto();
 
-            $this->storage->save($this->revisionDto);
+            $this->storage->save($revisonDto);
 
             /* reset auditor state */
-            $this->revisionDto = null;
+            $this->auditorDto = null;
         } catch (Throwable $t) {
             $this->handleThrowable($t);
         }
     }
 
-    private function getScheduledEntityDeletions(): array
+    private function createRevisonDto(): RevisionDto
     {
-        $unitOfWork = $this->entityManager->getUnitOfWork();
+        $user = $this->userProvider->getUser();
+
+        $entities = \array_map(
+            function (AuditorEntityDto $revisionDto) {
+                return new EntityDto(
+                    $revisionDto->getOperation(),
+                    $revisionDto->getClass(),
+                    $revisionDto->getColumns()
+                );
+            },
+            $this->auditorDto->getRevisions()
+        );
+
+        return new RevisionDto($user, $entities);
+    }
+
+    private function filterAuditedEntities(array $allEntities)
+    {
         $entities = [];
 
-        foreach ($unitOfWork->getScheduledEntityDeletions() as $entity) {
+        foreach ($allEntities as $entity) {
             $hash = \spl_object_hash($entity);
 
             if (isset($entities[$hash])) {
                 continue;
             }
 
-            $class = $this->entityManager->getClassMetadata(\get_class($entity));
-            if (!$this->isAudited($class->name)) {
-                continue;
-            }
-
-            $entities[$hash] = new EntityDto($entity);
-        }
-
-        return \array_values($entities);
-    }
-
-    private function getScheduledEntityInsertions(): array
-    {
-        $unitOfWork = $this->entityManager->getUnitOfWork();
-        $entities = [];
-
-        foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
             if (!$this->isAudited(\get_class($entity))) {
                 continue;
             }
 
-            $entities[\spl_object_hash($entity)] = new EntityDto($entity);
-        }
-
-        return \array_values($entities);
-    }
-
-    private function getScheduledEntityUpdates(): array
-    {
-        $unitOfWork = $this->entityManager->getUnitOfWork();
-        $entities = [];
-
-        foreach ($unitOfWork->getScheduledEntityUpdates() as $entity) {
-            if (!$this->isAudited(\get_class($entity))) {
-                continue;
-            }
-
-            $entities[\spl_object_hash($entity)] = new EntityDto($entity);
+            $entities[$hash] = $entity;
         }
 
         return \array_values($entities);
@@ -152,20 +139,7 @@ final class Auditor implements EventSubscriber
 
     private function isAudited(string $entityClass): bool
     {
-        return isset($this->entities[$entityClass]);
-    }
-
-    private function getOriginalEntityData($entity): array
-    {
-        $class = $this->entityManager->getClassMetadata(\get_class($entity));
-        $data = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
-
-        if ($class->isVersioned) {
-            $versionField = $class->versionField;
-            $data[$versionField] = $class->reflFields[$versionField]->getValue($entity);
-        }
-
-        return $data;
+        return isset($this->auditedEntities[$entityClass]);
     }
 
     private function handleThrowable(Throwable $t): void
