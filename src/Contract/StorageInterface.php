@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Contract;
 
-use Drjele\DoctrineAudit\Dto\Revision\RevisionDto;
+use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 
 interface StorageInterface
 {
-    public function save(RevisionDto $revisionDto): void;
+    public function save(StorageDto $storageDto): void;
 }

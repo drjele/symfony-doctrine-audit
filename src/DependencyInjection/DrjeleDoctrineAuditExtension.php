@@ -104,7 +104,7 @@ class DrjeleDoctrineAuditExtension extends Extension
             $entityManager = $auditor['entity_manager'];
             $connection = $auditor['connection'] ?? $entityManager;
             $storage = $auditor['storage'];
-            $userProvider = $auditor['user_provider'];
+            $transactionProvider = $auditor['transaction_provider'];
             $logger = $auditor['logger'] ?? null;
 
             $definition = new Definition(
@@ -113,7 +113,7 @@ class DrjeleDoctrineAuditExtension extends Extension
                     new Reference(AnnotationReadService::class),
                     $this->getEntityManager($entityManager),
                     new Reference($this->getStorageId($storage)),
-                    new Reference($userProvider),
+                    new Reference($transactionProvider),
                     null == $logger ? $logger : new Reference($logger),
                 ]
             );

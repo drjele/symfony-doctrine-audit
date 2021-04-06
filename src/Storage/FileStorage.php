@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Storage;
 
 use Drjele\DoctrineAudit\Contract\StorageInterface;
-use Drjele\DoctrineAudit\Dto\Revision\RevisionDto;
+use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 
 class FileStorage implements StorageInterface
@@ -21,7 +21,7 @@ class FileStorage implements StorageInterface
         $this->file = $file;
     }
 
-    public function save(RevisionDto $revisionDto): void
+    public function save(StorageDto $storageDto): void
     {
         throw new Exception('implement');
     }

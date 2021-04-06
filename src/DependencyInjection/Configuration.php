@@ -66,7 +66,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('entity_manager')->defaultValue('default')->end()
             ->scalarNode('connection')->end()
             ->scalarNode('storage')->isRequired()->end()
-            ->scalarNode('user_provider')->isRequired()->end()
+            ->scalarNode('transaction_provider')->isRequired()->end()
             ->scalarNode('logger')->end();
     }
 }

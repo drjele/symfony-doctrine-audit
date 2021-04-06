@@ -14,11 +14,11 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
-use Drjele\DoctrineAudit\Contract\UserProviderInterface;
+use Drjele\DoctrineAudit\Contract\TransactionProviderInterface;
 use Drjele\DoctrineAudit\Dto\Auditor\AuditorDto;
 use Drjele\DoctrineAudit\Dto\Auditor\EntityDto as AuditorEntityDto;
-use Drjele\DoctrineAudit\Dto\Revision\EntityDto;
-use Drjele\DoctrineAudit\Dto\Revision\RevisionDto;
+use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
+use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Psr\Log\LoggerInterface;
@@ -29,7 +29,7 @@ final class Auditor implements EventSubscriber
     private array $auditedEntities;
     private EntityManagerInterface $entityManager;
     private StorageInterface $storage;
-    private UserProviderInterface $userProvider;
+    private TransactionProviderInterface $transactionProvider;
     private ?LoggerInterface $logger;
 
     /** processing data */
@@ -39,14 +39,14 @@ final class Auditor implements EventSubscriber
         AnnotationReadService $annotationReadService,
         EntityManagerInterface $entityManager,
         StorageInterface $storage,
-        UserProviderInterface $userProvider,
+        TransactionProviderInterface $transactionProvider,
         ?LoggerInterface $logger
     ) {
         /* @todo read and set entities on cache create */
         $this->auditedEntities = $annotationReadService->read($entityManager);
         $this->entityManager = $entityManager;
         $this->storage = $storage;
-        $this->userProvider = $userProvider;
+        $this->transactionProvider = $transactionProvider;
         $this->logger = $logger;
     }
 
@@ -57,12 +57,12 @@ final class Auditor implements EventSubscriber
 
     public function onFlush(OnFlushEventArgs $eventArgs): void
     {
-        /* @todo compute updates revisions somewhere */
+        /* @todo compute updates transactions somewhere */
 
         try {
             $unitOfWork = $this->entityManager->getUnitOfWork();
 
-            /** @todo compute deletions revisions here */
+            /** @todo compute deletions transactions here */
             $entitiesToDelete = $this->filterAuditedEntities($unitOfWork->getScheduledEntityDeletions());
 
             $entitiesToInsert = $this->filterAuditedEntities($unitOfWork->getScheduledEntityInsertions());
@@ -86,37 +86,39 @@ final class Auditor implements EventSubscriber
                 return;
             }
 
-            /** @todo compute insertions revisions here */
-            $revisonDto = $this->createRevisonDto();
+            /** @todo compute insertions transactions here */
+            $storageDto = $this->createStorageDto();
 
-            $this->storage->save($revisonDto);
+            $this->storage->save($storageDto);
 
             /* reset auditor state */
             $this->auditorDto = null;
+
+            \gc_collect_cycles();
         } catch (Throwable $t) {
             $this->handleThrowable($t);
         }
     }
 
-    private function createRevisonDto(): RevisionDto
+    private function createStorageDto(): StorageDto
     {
-        $user = $this->userProvider->getUser();
+        $transaction = $this->transactionProvider->getTransaction();
 
         $entities = \array_map(
-            function (AuditorEntityDto $revisionDto) {
+            function (AuditorEntityDto $transactionDto) {
                 return new EntityDto(
-                    $revisionDto->getOperation(),
-                    $revisionDto->getClass(),
-                    $revisionDto->getColumns()
+                    $transactionDto->getOperation(),
+                    $transactionDto->getClass(),
+                    $transactionDto->getColumns()
                 );
             },
-            $this->auditorDto->getRevisions()
+            $this->auditorDto->getEntities()
         );
 
-        return new RevisionDto($user, $entities);
+        return new StorageDto($transaction, $entities);
     }
 
-    private function filterAuditedEntities(array $allEntities)
+    private function filterAuditedEntities(array $allEntities): array
     {
         $entities = [];
 

@@ -13,7 +13,8 @@ class AuditorDto
     private array $entitiesToDelete;
     private array $entitiesToInsert;
     private array $entitiesToUpdate;
-    private array $revisions;
+    /** @var EntityDto[] */
+    private array $entities;
 
     public function __construct(
         array $entitiesToDelete,
@@ -23,7 +24,7 @@ class AuditorDto
         $this->entitiesToDelete = $entitiesToDelete;
         $this->entitiesToInsert = $entitiesToInsert;
         $this->entitiesToUpdate = $entitiesToUpdate;
-        $this->revisions = [];
+        $this->entities = [];
     }
 
     public function getEntitiesToDelete(): ?array
@@ -42,14 +43,14 @@ class AuditorDto
     }
 
     /** @return EntityDto[] */
-    public function getRevisions(): ?array
+    public function getEntities(): ?array
     {
-        return $this->revisions;
+        return $this->entities;
     }
 
-    public function addRevision(EntityDto $entityDto): self
+    public function addEntity(EntityDto $entityDto): self
     {
-        $this->revisions[] = $entityDto;
+        $this->entities[] = $entityDto;
 
         return $this;
     }

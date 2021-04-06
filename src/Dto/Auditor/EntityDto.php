@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Dto\Auditor;
 
 use Drjele\DoctrineAudit\Dto\ColumnDto;
-use Drjele\DoctrineAudit\Dto\Revision\EntityDtoTrait;
+use Drjele\DoctrineAudit\Dto\Storage\EntityDtoTrait;
 
 class EntityDto
 {
