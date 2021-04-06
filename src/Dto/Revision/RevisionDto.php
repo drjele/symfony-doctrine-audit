@@ -11,13 +11,16 @@ namespace Drjele\DoctrineAudit\Dto\Revision;
 class RevisionDto
 {
     private UserDto $user;
-    /** @var EntityDto[] */
-    private array $entities;
+    private array $deletions;
+    private array $insertions;
+    private array $updates;
 
-    public function __construct(UserDto $user, array $entities)
+    public function __construct(UserDto $user, array $deletions, array $insertions, array $updates)
     {
         $this->user = $user;
-        $this->entities = $entities;
+        $this->deletions = $deletions;
+        $this->insertions = $insertions;
+        $this->updates = $updates;
     }
 
     public function getUser(): ?UserDto
@@ -26,8 +29,20 @@ class RevisionDto
     }
 
     /** @return EntityDto[] */
-    public function getEntities(): ?array
+    public function getDeletions(): ?array
     {
-        return $this->entities;
+        return $this->deletions;
+    }
+
+    /** @return EntityDto[] */
+    public function getInsertions(): ?array
+    {
+        return $this->insertions;
+    }
+
+    /** @return EntityDto[] */
+    public function getUpdates(): ?array
+    {
+        return $this->updates;
     }
 }
