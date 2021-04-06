@@ -4,7 +4,7 @@
 
 Any suggestions are welcomed.
 
-**This is work in progress**.
+**This is a work in progress**.
 
 ## Purpose
 
@@ -12,6 +12,35 @@ Any suggestions are welcomed.
 * the audit database to have its own connection.
 * use two step storage for failover and to not slow down the primary application thread.
 * multiple storage types.
+
+## Sample config
+
+```yaml
+drjele_doctrine_audit:
+    storages:
+        doctrine:
+            type: doctrine
+            entity_manager: default
+        file:
+            type: file
+            file: '%kernel.project_dir%/var/audit.log'
+        custom:
+            type: custom
+            service: Acme\Common\Service\AuditStorageService
+    auditors:
+        doctrine:
+            entity_manager: default
+            storage: doctrine
+            user_provider: Acme\Common\Service\AuditUserProviderService
+        file:
+            entity_manager: default
+            storage: file
+            user_provider: Acme\Common\Service\AuditUserProviderService
+        custom:
+            entity_manager: default
+            storage: custom
+            user_provider: Acme\Common\Service\AuditUserProviderService
+```
 
 ## Inspired by
 
@@ -21,9 +50,7 @@ Any suggestions are welcomed.
 
 ## Todo
 
-* config
-* subscriber
-* different storages
-* chained storages
-* entity difference dto
-* logger
+* config.
+* chain storages.
+* logger.
+* schema update.

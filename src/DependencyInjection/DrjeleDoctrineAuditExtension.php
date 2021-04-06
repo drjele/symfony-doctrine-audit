@@ -9,7 +9,10 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\DependencyInjection;
 
 use Drjele\DoctrineAudit\Auditor\Auditor;
+use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
+use Drjele\DoctrineAudit\Storage\DoctrineStorage;
+use Drjele\DoctrineAudit\Storage\FileStorage;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -38,11 +41,60 @@ class DrjeleDoctrineAuditExtension extends Extension
     private function defineStorages(ContainerBuilder $container, array $storages): void
     {
         foreach ($storages as $name => $storage) {
-            $class = $storage['class'];
+            $type = $storage['type'];
+            $storageServiceId = $this->getStorageId($name);
 
-            $definition = new Definition($class);
+            switch ($type) {
+                case Configuration::TYPE_DOCTRINE:
+                    $entityManager = $storage['entity_manager'];
 
-            $container->setDefinition($this->getStorageId($name), $definition);
+                    if (empty($entityManager)) {
+                        throw new Exception(
+                            \sprintf('the "%s" config is mandatory for storage type "%s"', 'entity_manager', $type)
+                        );
+                    }
+
+                    $definition = new Definition(
+                        DoctrineStorage::class,
+                        [
+                            $this->getEntityManager($entityManager),
+                        ]
+                    );
+
+                    $container->setDefinition($storageServiceId, $definition);
+                    break;
+                case Configuration::TYPE_FILE:
+                    $file = $storage['file'];
+
+                    if (empty($file)) {
+                        throw new Exception(
+                            \sprintf('the "%s" config is mandatory for storage type "%s"', 'file', $type)
+                        );
+                    }
+
+                    $definition = new Definition(
+                        FileStorage::class,
+                        [
+                            $file,
+                        ]
+                    );
+
+                    $container->setDefinition($storageServiceId, $definition);
+                    break;
+                case Configuration::TYPE_CUSTOM:
+                    $service = $storage['service'];
+
+                    if (empty($service)) {
+                        throw new Exception(
+                            \sprintf('the "%s" config is mandatory for storage type "%s"', 'service', $type)
+                        );
+                    }
+
+                    $container->setAlias($storageServiceId, $service);
+                    break;
+                default:
+                    throw new Exception(\sprintf('invalid storage type "%s"', $type));
+            }
         }
     }
 

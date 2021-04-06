@@ -41,9 +41,16 @@ class Configuration implements ConfigurationInterface
             ->useAttributeAsKey('name')
             ->prototype('array');
 
+        $types = [static::TYPE_DOCTRINE, static::TYPE_FILE, static::TYPE_CUSTOM];
+
+        /* @todo have different child nodes based on type */
         $storages->children()
-            ->enumNode('type')->values([static::TYPE_DOCTRINE, static::TYPE_FILE, static::TYPE_CUSTOM])->end()
-            ->scalarNode('class')->isRequired()->end();
+            ->scalarNode('name')->end()
+            ->enumNode('type')->values($types)->isRequired()->end()
+            ->scalarNode('entity_manager')->end()/* for doctrine */
+            ->scalarNode('file')->end()/* for doctrine */
+            ->scalarNode('service')->end()/* for custom */
+        ;
     }
 
     private function attachAuditors(NodeBuilder $root): void
