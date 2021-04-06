@@ -16,11 +16,13 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Attribute;
+use Doctrine\Common\Annotations\Annotation\Attributes;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target(Target::TARGET_CLASS)
+ * @Target("CLASS")
  * @Attributes({@Attribute("enabled", required=false, type="bool")})
  */
 final class Auditable extends Annotation

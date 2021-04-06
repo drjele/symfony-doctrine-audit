@@ -17,7 +17,10 @@ use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Contract\UserProviderInterface;
 use Drjele\DoctrineAudit\Dto\Revision\EntityDto;
 use Drjele\DoctrineAudit\Dto\Revision\RevisionDto;
+use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 final class Auditor implements EventSubscriber
 {
@@ -25,6 +28,7 @@ final class Auditor implements EventSubscriber
     private EntityManagerInterface $entityManager;
     private StorageInterface $storage;
     private UserProviderInterface $userProvider;
+    private ?LoggerInterface $logger;
 
     /** processing data */
     private ?RevisionDto $revisionDto = null;
@@ -33,13 +37,15 @@ final class Auditor implements EventSubscriber
         AnnotationReadService $annotationReadService,
         EntityManagerInterface $entityManager,
         StorageInterface $storage,
-        UserProviderInterface $userProvider
+        UserProviderInterface $userProvider,
+        ?LoggerInterface $logger
     ) {
         /* @todo read and set entities on cache create */
         $this->entities = $annotationReadService->read($entityManager);
         $this->entityManager = $entityManager;
         $this->storage = $storage;
         $this->userProvider = $userProvider;
+        $this->logger = $logger;
     }
 
     public function getSubscribedEvents()
@@ -49,36 +55,44 @@ final class Auditor implements EventSubscriber
 
     public function onFlush(OnFlushEventArgs $eventArgs): void
     {
-        $deletions = $this->getScheduledEntityDeletions();
+        /* @todo compute updates change set here */
 
-        $insertions = $this->getScheduledEntityInsertions();
+        try {
+            $deletions = $this->getScheduledEntityDeletions();
 
-        $updates = $this->getScheduledEntityUpdates();
+            /** @todo compute deletions change set here */
+            $insertions = $this->getScheduledEntityInsertions();
 
-        if (!$deletions && !$insertions && !$updates) {
-            return;
+            $updates = $this->getScheduledEntityUpdates();
+
+            if (!$deletions && !$insertions && !$updates) {
+                return;
+            }
+
+            $userDto = $this->userProvider->getUser();
+
+            $this->revisionDto = new RevisionDto($userDto, $deletions, $insertions, $updates);
+        } catch (Throwable $t) {
+            $this->handleThrowable($t);
         }
-
-        $userDto = $this->userProvider->getUser();
-
-        $this->revisionDto = new RevisionDto($userDto, $deletions, $insertions, $updates);
     }
 
     public function postFlush(PostFlushEventArgs $eventArgs): void
     {
-        if (null === $this->revisionDto) {
-            return;
-        }
+        try {
+            if (null === $this->revisionDto) {
+                return;
+            }
 
-        foreach ($this->revisionDto->getInsertions() as $insertion) {
-            $data = $this->getOriginalEntityData($insertion->getEntity());
-            \print_r($data);
-        }
-        exit;
-        $this->storage->save($this->revisionDto);
+            /* @todo compute insertions change set here */
 
-        /* reset auditor state */
-        $this->revisionDto = null;
+            $this->storage->save($this->revisionDto);
+
+            /* reset auditor state */
+            $this->revisionDto = null;
+        } catch (Throwable $t) {
+            $this->handleThrowable($t);
+        }
     }
 
     private function getScheduledEntityDeletions(): array
@@ -152,5 +166,22 @@ final class Auditor implements EventSubscriber
         }
 
         return $data;
+    }
+
+    private function handleThrowable(Throwable $t): void
+    {
+        if ($this->logger) {
+            $this->logger->error(
+                $t->getMessage(),
+                [
+                    'code' => $t->getCode(),
+                    'file' => $t->getFile(),
+                    'line' => $t->getLine(),
+                    'trace' => $t->getTrace(),
+                ]
+            );
+        }
+
+        throw new Exception($t->getMessage(), $t->getCode(), $t);
     }
 }

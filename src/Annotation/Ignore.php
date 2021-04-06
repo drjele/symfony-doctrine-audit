@@ -20,7 +20,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target(Target::TARGET_PROPERTY)
+ * @Target("PROPERTY")
  */
 final class Ignore extends Annotation
 {
