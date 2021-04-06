@@ -30,41 +30,59 @@ class DrjeleDoctrineAuditExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $this->attachAuditors($container, $config['auditors']);
+        $this->defineStorages($container, $config['storages']);
+
+        $this->defineAuditors($container, $config['auditors']);
     }
 
-    private function attachAuditors(ContainerBuilder $container, array $auditors): void
+    private function defineStorages(ContainerBuilder $container, array $storages): void
+    {
+        foreach ($storages as $name => $storage) {
+            $class = $storage['class'];
+
+            $definition = new Definition($class);
+
+            $container->setDefinition($this->getStorageId($name), $definition);
+        }
+    }
+
+    private function defineAuditors(ContainerBuilder $container, array $auditors): void
     {
         foreach ($auditors as $name => $auditor) {
-            $entityManagerName = $auditor['entity_manager'];
+            $entityManager = $auditor['entity_manager'];
+            $connection = $auditor['connection'] ?? $entityManager;
             $storage = $auditor['storage'];
+            $userProvider = $auditor['user_provider'];
 
             $definition = new Definition(
                 Auditor::class,
                 [
                     new Reference(AnnotationReadService::class),
-                    $this->getEntityManager($entityManagerName),
-                    new Reference($storage),
+                    $this->getEntityManager($entityManager),
+                    new Reference($this->getStorageId($storage)),
+                    new Reference($userProvider),
                 ]
             );
 
-            $definition->addTag(
-                'doctrine.event_subscriber',
-                [
-                    'connection' => $auditor['connection'] ?? $auditor['entity_manager'],
-                ]
-            );
+            $definition->addTag('doctrine.event_subscriber', ['connection' => $connection]);
 
-            $id = \sprintf('drjele_doctrine_audit.auditor.%s', $name);
-
-            $container->setDefinition($id, $definition);
+            $container->setDefinition($this->getAuditorId($name), $definition);
         }
+    }
+
+    private function getStorageId(string $name): string
+    {
+        return \sprintf('drjele_doctrine_audit.storage.%s', $name);
+    }
+
+    private function getAuditorId(string $name): string
+    {
+        return \sprintf('drjele_doctrine_audit.auditor.%s', $name);
     }
 
     private function getEntityManager(string $name): Reference
     {
-        $entityManagerName = \sprintf('doctrine.orm.%s_entity_manager', $name);
-
-        return new Reference($entityManagerName);
+        /* @todo get from doctrine */
+        return new Reference(\sprintf('doctrine.orm.%s_entity_manager', $name));
     }
 }

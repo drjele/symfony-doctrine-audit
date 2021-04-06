@@ -1,8 +1,2 @@
 services:
-    Drjele\DoctrineAudit\EventSubscriber\DoctrineSubscriber:
-        tags:
-            - { name: doctrine.event_subscriber }
-
     Drjele\DoctrineAudit\Service\AnnotationReadService: ~
-
-    Drjele\DoctrineAudit\Storage\DoctrineStorage: ~
