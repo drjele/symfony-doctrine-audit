@@ -42,6 +42,8 @@ class UpdateCommand extends AbstractCommand
                 return static::SUCCESS;
             }
 
+            $this->warning('this operation should not be executed in a production environment');
+
             $this->writeln('the following sql statements will be executed');
 
             foreach ($sqls as $sql) {

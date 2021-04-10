@@ -29,6 +29,7 @@ abstract class AbstractCommand extends \Drjele\SymfonyCommand\Command\AbstractCo
 
     protected function createSchemaTool(): SchemaTool
     {
+        /** @todo only consider audited entities */
         $sourceMetadatas = $this->sourceEntityManager->getMetadataFactory()->getAllMetadata();
 
         foreach ($sourceMetadatas as $classMetadata) {

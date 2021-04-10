@@ -35,6 +35,8 @@ class CreateCommand extends AbstractCommand
             $schemaTool = $this->createSchemaTool();
 
             if ($dumpSql) {
+                $this->writeln('the following sql statements will be executed');
+
                 $sqls = $schemaTool->getCreateSchemaSql($sourceMetadatas);
 
                 foreach ($sqls as $sql) {
