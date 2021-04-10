@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\DependencyInjection;
 
 use Drjele\DoctrineAudit\Auditor\Auditor;
-use Drjele\DoctrineAudit\Command\SchemaCreateCommand;
-use Drjele\DoctrineAudit\Command\SchemaUpdateCommand;
+use Drjele\DoctrineAudit\Command\DoctrineSchema\CreateCommand;
+use Drjele\DoctrineAudit\Command\DoctrineSchema\UpdateCommand;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Drjele\DoctrineAudit\Storage\DoctrineStorage;
@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class DrjeleDoctrineAuditExtension extends Extension
 {
-    private const BASE_COMMAND_NAME = 'drjele-doctrine-audit';
+    private const BASE_COMMAND_NAME = 'drjele:doctrine:audit';
     private const BASE_SERVICE_ID = 'drjele_doctrine_audit';
 
     public function load(array $configs, ContainerBuilder $container)
@@ -122,7 +122,7 @@ class DrjeleDoctrineAuditExtension extends Extension
         $destinationEntityManagerReference = $this->getEntityManager($destinationEntityManager);
 
         $createCommandDefinition = new Definition(
-            SchemaCreateCommand::class,
+            CreateCommand::class,
             [
                 \sprintf('%s:schema:create:%s', static::BASE_COMMAND_NAME, $name),
                 $sourceEntityManagerReference,
@@ -135,7 +135,7 @@ class DrjeleDoctrineAuditExtension extends Extension
         $container->setDefinition($this->getCommandId(\sprintf('create.%s', $name)), $createCommandDefinition);
 
         $updateCommandDefinition = new Definition(
-            SchemaUpdateCommand::class,
+            UpdateCommand::class,
             [
                 \sprintf('%s:schema:update:%s', static::BASE_COMMAND_NAME, $name),
                 $sourceEntityManagerReference,

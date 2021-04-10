@@ -6,48 +6,33 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Command;
+namespace Drjele\DoctrineAudit\Command\DoctrineSchema;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\SchemaTool;
-use Drjele\SymfonyCommand\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-class SchemaCreateCommand extends AbstractCommand
+class CreateCommand extends AbstractCommand
 {
-    private EntityManagerInterface $sourceEntityManager;
-    private EntityManagerInterface $destinationEntityManager;
-
-    public function __construct(
-        string $name,
-        EntityManagerInterface $sourceEntityManager,
-        EntityManagerInterface $destinationEntityManager
-    ) {
-        parent::__construct($name);
-
-        $this->sourceEntityManager = $sourceEntityManager;
-        $this->destinationEntityManager = $destinationEntityManager;
-    }
+    private const DUMP_SQL = 'dump-sql';
 
     protected function configure()
     {
         parent::configure();
 
         $this->setDescription('create the database schema for the corresponding auditor')
-            ->addOption('dump-sql', null, InputOption::VALUE_NONE, 'output the sql');
+            ->addOption(static::DUMP_SQL, null, InputOption::VALUE_NONE, 'output the sql');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $dumpSql = true === $input->getOption('dump-sql');
+            $dumpSql = true === $input->getOption(static::DUMP_SQL);
 
             $sourceMetadatas = $this->sourceEntityManager->getMetadataFactory()->getAllMetadata();
 
-            $schemaTool = new SchemaTool($this->destinationEntityManager);
+            $schemaTool = $this->createSchemaTool();
 
             if ($dumpSql) {
                 $sqls = $schemaTool->getCreateSchemaSql($sourceMetadatas);
