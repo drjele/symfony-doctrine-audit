@@ -28,28 +28,23 @@ class UpdateCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $force = true === $input->getOption(static::FORCE);
+            $this->warning('careful when running this in a production environment');
 
             $sourceMetadatas = $this->sourceEntityManager->getMetadataFactory()->getAllMetadata();
 
             $schemaTool = $this->createSchemaTool();
 
-            $sqls = $schemaTool->getUpdateSchemaSql($sourceMetadatas, true);
-
-            if (empty($sqls)) {
-                $this->success('nothing to update');
-
-                return static::SUCCESS;
-            }
-
-            $this->warning('this operation should not be executed in a production environment');
-
             $this->writeln('the following sql statements will be executed');
+
+            $sqls = $schemaTool->getUpdateSchemaSql($sourceMetadatas, true);
 
             foreach ($sqls as $sql) {
                 $this->io->writeln(\sprintf('    %s;', $sql));
             }
 
+            $this->writeln('---------------------------------------------------------');
+
+            $force = true === $input->getOption(static::FORCE);
             if ($force) {
                 $this->writeln('updating database schema');
 

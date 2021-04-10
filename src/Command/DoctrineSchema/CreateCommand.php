@@ -15,44 +15,43 @@ use Throwable;
 
 class CreateCommand extends AbstractCommand
 {
-    private const DUMP_SQL = 'dump-sql';
+    private const FORCE = 'force';
 
     protected function configure()
     {
         parent::configure();
 
         $this->setDescription('create the database schema for the corresponding auditor')
-            ->addOption(static::DUMP_SQL, null, InputOption::VALUE_NONE, 'output the sql');
+            ->addOption(static::FORCE, null, InputOption::VALUE_NONE, 'run the sql');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $dumpSql = true === $input->getOption(static::DUMP_SQL);
+            $this->warning('careful when running this in a production environment');
 
             $sourceMetadatas = $this->sourceEntityManager->getMetadataFactory()->getAllMetadata();
 
             $schemaTool = $this->createSchemaTool();
 
-            if ($dumpSql) {
-                $this->writeln('the following sql statements will be executed');
+            $this->writeln('the following sql statements will be executed');
 
-                $sqls = $schemaTool->getCreateSchemaSql($sourceMetadatas);
+            $sqls = $schemaTool->getCreateSchemaSql($sourceMetadatas);
 
-                foreach ($sqls as $sql) {
-                    $this->io->writeln(\sprintf('    %s;', $sql));
-                }
-
-                return static::SUCCESS;
+            foreach ($sqls as $sql) {
+                $this->io->writeln(\sprintf('    %s;', $sql));
             }
 
-            $this->warning('this operation should not be executed in a production environment');
+            $this->writeln('---------------------------------------------------------');
 
-            $this->writeln('creating database schema');
+            $force = true === $input->getOption(static::FORCE);
+            if ($force) {
+                $this->writeln('creating database schema');
 
-            $schemaTool->createSchema($sourceMetadatas);
+                $schemaTool->createSchema($sourceMetadatas);
 
-            $this->success('database schema created successfully');
+                $this->success('database schema created successfully');
+            }
         } catch (Throwable $t) {
             $this->error($t->getMessage());
 

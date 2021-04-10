@@ -152,6 +152,7 @@ class DrjeleDoctrineAuditExtension extends Extension
     {
         $type = $storage['type'];
         $entityManager = $storage['entity_manager'] ?? null;
+        $connection = $storage['connection'] ?? $entityManager;
 
         if (empty($entityManager)) {
             throw new Exception(
@@ -165,6 +166,8 @@ class DrjeleDoctrineAuditExtension extends Extension
                 $this->getEntityManager($entityManager),
             ]
         );
+
+        $definition->addTag('doctrine.event_subscriber', ['connection' => $connection]);
 
         $storageServiceId = $this->getStorageId($name);
 

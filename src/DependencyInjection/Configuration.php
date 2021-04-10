@@ -48,7 +48,8 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('name')->end()
             ->enumNode('type')->values($types)->isRequired()->end()
             ->scalarNode('entity_manager')->end()/* for doctrine */
-            ->scalarNode('file')->end()/* for doctrine */
+            ->scalarNode('connection')->end()/* for doctrine */
+            ->scalarNode('file')->end()/* for file */
             ->scalarNode('service')->end()/* for custom */
         ;
     }
