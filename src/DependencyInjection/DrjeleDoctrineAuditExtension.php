@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\DependencyInjection;
 
 use Drjele\DoctrineAudit\Auditor\Auditor;
-use Drjele\DoctrineAudit\Command\CreateCommand;
-use Drjele\DoctrineAudit\Command\UpdateCommand;
+use Drjele\DoctrineAudit\Command\SchemaCreateCommand;
+use Drjele\DoctrineAudit\Command\SchemaUpdateCommand;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Drjele\DoctrineAudit\Storage\DoctrineStorage;
@@ -24,6 +24,9 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class DrjeleDoctrineAuditExtension extends Extension
 {
+    private const BASE_COMMAND_NAME = 'drjele-doctrine-audit';
+    private const BASE_SERVICE_ID = 'drjele_doctrine_audit';
+
     public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new YamlFileLoader(
@@ -49,13 +52,13 @@ class DrjeleDoctrineAuditExtension extends Extension
 
             switch ($type) {
                 case Configuration::TYPE_DOCTRINE:
-                    $this->createStorageDoctrine($container, $storage, $name);
+                    $this->defineStorageDoctrine($container, $storage, $name);
                     break;
                 case Configuration::TYPE_FILE:
-                    $this->createStorageFile($container, $storage, $name);
+                    $this->defineStorageFile($container, $storage, $name);
                     break;
                 case Configuration::TYPE_CUSTOM:
-                    $this->createStorageCustom($container, $storage, $name);
+                    $this->defineStorageCustom($container, $storage, $name);
                     break;
                 default:
                     throw new Exception(\sprintf('invalid storage type "%s"', $type));
@@ -94,22 +97,22 @@ class DrjeleDoctrineAuditExtension extends Extension
         foreach ($auditors as $name => $auditor) {
             $storage = $storages[$auditor['storage']];
 
-            $type = $storage['type'];
+            $storageType = $storage['type'];
 
-            if (Configuration::TYPE_DOCTRINE !== $type) {
-                continue;
+            switch ($storageType) {
+                case Configuration::TYPE_DOCTRINE:
+                    $this->defineSchemaCommands(
+                        $container,
+                        $name,
+                        $auditor['entity_manager'],
+                        $storage['entity_manager']
+                    );
+                    break;
             }
-
-            $this->createDoctrineSchemaCommands(
-                $container,
-                $name,
-                $auditor['entity_manager'],
-                $storage['entity_manager']
-            );
         }
     }
 
-    private function createDoctrineSchemaCommands(
+    private function defineSchemaCommands(
         ContainerBuilder $container,
         string $name,
         string $sourceEntityManager,
@@ -118,30 +121,34 @@ class DrjeleDoctrineAuditExtension extends Extension
         $sourceEntityManagerReference = $this->getEntityManager($sourceEntityManager);
         $destinationEntityManagerReference = $this->getEntityManager($destinationEntityManager);
 
-        $definition = new Definition(
-            CreateCommand::class,
+        $createCommandDefinition = new Definition(
+            SchemaCreateCommand::class,
             [
-                \sprintf('drjele-doctrine-audit:create:%s', $name),
+                \sprintf('%s:schema:create:%s', static::BASE_COMMAND_NAME, $name),
                 $sourceEntityManagerReference,
                 $destinationEntityManagerReference,
             ]
         );
 
-        $container->setDefinition($this->getCommandId(\sprintf('create.%s', $name)), $definition);
+        $createCommandDefinition->addTag('console.command');
 
-        $definition = new Definition(
-            UpdateCommand::class,
+        $container->setDefinition($this->getCommandId(\sprintf('create.%s', $name)), $createCommandDefinition);
+
+        $updateCommandDefinition = new Definition(
+            SchemaUpdateCommand::class,
             [
-                \sprintf('drjele-doctrine-audit:update:%s', $name),
+                \sprintf('%s:schema:update:%s', static::BASE_COMMAND_NAME, $name),
                 $sourceEntityManagerReference,
                 $destinationEntityManagerReference,
             ]
         );
 
-        $container->setDefinition($this->getCommandId(\sprintf('update.%s', $name)), $definition);
+        $updateCommandDefinition->addTag('console.command');
+
+        $container->setDefinition($this->getCommandId(\sprintf('update.%s', $name)), $updateCommandDefinition);
     }
 
-    private function createStorageDoctrine(ContainerBuilder $container, array $storage, string $name): void
+    private function defineStorageDoctrine(ContainerBuilder $container, array $storage, string $name): void
     {
         $type = $storage['type'];
         $entityManager = $storage['entity_manager'] ?? null;
@@ -164,7 +171,7 @@ class DrjeleDoctrineAuditExtension extends Extension
         $container->setDefinition($storageServiceId, $definition);
     }
 
-    private function createStorageFile(ContainerBuilder $container, array $storage, string $name): void
+    private function defineStorageFile(ContainerBuilder $container, array $storage, string $name): void
     {
         $type = $storage['type'];
         $file = $storage['file'] ?? null;
@@ -187,7 +194,7 @@ class DrjeleDoctrineAuditExtension extends Extension
         $container->setDefinition($storageServiceId, $definition);
     }
 
-    private function createStorageCustom(ContainerBuilder $container, array $storage, string $name): void
+    private function defineStorageCustom(ContainerBuilder $container, array $storage, string $name): void
     {
         $type = $storage['type'];
         $service = $storage['service'];
@@ -205,17 +212,17 @@ class DrjeleDoctrineAuditExtension extends Extension
 
     private function getStorageId(string $name): string
     {
-        return \sprintf('drjele_doctrine_audit.storage.%s', $name);
+        return \sprintf('%s.storage.%s', static::BASE_SERVICE_ID, $name);
     }
 
     private function getAuditorId(string $name): string
     {
-        return \sprintf('drjele_doctrine_audit.auditor.%s', $name);
+        return \sprintf('%s.auditor.%s', static::BASE_SERVICE_ID, $name);
     }
 
     private function getCommandId(string $name): string
     {
-        return \sprintf('drjele_doctrine_audit.command.%s', $name);
+        return \sprintf('%s.command.%s', static::BASE_SERVICE_ID, $name);
     }
 
     private function getEntityManager(string $name): Reference
