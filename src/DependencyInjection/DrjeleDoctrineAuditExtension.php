@@ -105,7 +105,8 @@ class DrjeleDoctrineAuditExtension extends Extension
                         $container,
                         $name,
                         $auditor['entity_manager'],
-                        $storage['entity_manager']
+                        $storage['entity_manager'],
+                        $storage['connection'] ?? $storage['entity_manager']
                     );
                     break;
             }
@@ -114,45 +115,51 @@ class DrjeleDoctrineAuditExtension extends Extension
 
     private function defineSchemaCommands(
         ContainerBuilder $container,
-        string $name,
+        string $auditorName,
         string $sourceEntityManager,
-        string $destinationEntityManager
+        string $destinationEntityManager,
+        string $destinationConnection
     ): void {
         $sourceEntityManagerReference = $this->getEntityManager($sourceEntityManager);
         $destinationEntityManagerReference = $this->getEntityManager($destinationEntityManager);
 
-        $createCommandDefinition = new Definition(
-            CreateCommand::class,
-            [
-                \sprintf('%s:schema:create:%s', static::BASE_COMMAND_NAME, $name),
-                $sourceEntityManagerReference,
-                $destinationEntityManagerReference,
-            ]
-        );
+        $defineCommand = function (
+            string $commandClass,
+            string $commandName
+        ) use (
+            $container,
+            $auditorName,
+            $sourceEntityManagerReference,
+            $destinationEntityManagerReference,
+            $destinationConnection
+        ): void {
+            $definition = new Definition(
+                $commandClass,
+                [
+                    \sprintf('%s:schema:%s:%s', static::BASE_COMMAND_NAME, $commandName, $auditorName),
+                    $sourceEntityManagerReference,
+                    $destinationEntityManagerReference,
+                ]
+            );
 
-        $createCommandDefinition->addTag('console.command');
+            $definition->addTag('doctrine.event_subscriber', ['connection' => $destinationConnection])
+                ->addTag('console.command');
 
-        $container->setDefinition($this->getCommandId(\sprintf('create.%s', $name)), $createCommandDefinition);
+            $container->setDefinition(
+                $this->getCommandId(\sprintf('%s.%s', $commandName, $auditorName)),
+                $definition
+            );
+        };
 
-        $updateCommandDefinition = new Definition(
-            UpdateCommand::class,
-            [
-                \sprintf('%s:schema:update:%s', static::BASE_COMMAND_NAME, $name),
-                $sourceEntityManagerReference,
-                $destinationEntityManagerReference,
-            ]
-        );
+        $defineCommand(CreateCommand::class, 'create');
 
-        $updateCommandDefinition->addTag('console.command');
-
-        $container->setDefinition($this->getCommandId(\sprintf('update.%s', $name)), $updateCommandDefinition);
+        $defineCommand(UpdateCommand::class, 'update');
     }
 
     private function defineStorageDoctrine(ContainerBuilder $container, array $storage, string $name): void
     {
         $type = $storage['type'];
         $entityManager = $storage['entity_manager'] ?? null;
-        $connection = $storage['connection'] ?? $entityManager;
 
         if (empty($entityManager)) {
             throw new Exception(
@@ -166,8 +173,6 @@ class DrjeleDoctrineAuditExtension extends Extension
                 $this->getEntityManager($entityManager),
             ]
         );
-
-        $definition->addTag('doctrine.event_subscriber', ['connection' => $connection]);
 
         $storageServiceId = $this->getStorageId($name);
 
