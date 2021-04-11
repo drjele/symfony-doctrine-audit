@@ -11,7 +11,6 @@ namespace Drjele\DoctrineAudit\DependencyInjection;
 use Drjele\DoctrineAudit\Auditor\Auditor;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\CreateCommand;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\UpdateCommand;
-use Drjele\DoctrineAudit\EventSubscriber\DoctrineSchemaSubscriber;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Drjele\DoctrineAudit\Storage\DoctrineStorage;
@@ -106,8 +105,7 @@ class DrjeleDoctrineAuditExtension extends Extension
                         $container,
                         $name,
                         $auditor['entity_manager'],
-                        $storage['entity_manager'],
-                        $storage['connection'] ?? $storage['entity_manager']
+                        $storage['entity_manager']
                     );
                     break;
             }
@@ -118,8 +116,7 @@ class DrjeleDoctrineAuditExtension extends Extension
         ContainerBuilder $container,
         string $auditorName,
         string $sourceEntityManager,
-        string $destinationEntityManager,
-        string $destinationConnection
+        string $destinationEntityManager
     ): void {
         $sourceEntityManagerReference = $this->getEntityManager($sourceEntityManager);
         $destinationEntityManagerReference = $this->getEntityManager($destinationEntityManager);
@@ -153,12 +150,6 @@ class DrjeleDoctrineAuditExtension extends Extension
         $defineCommand(CreateCommand::class, 'create');
 
         $defineCommand(UpdateCommand::class, 'update');
-
-        $doctrineSchemaSubscriber = new Definition(DoctrineSchemaSubscriber::class);
-
-        $doctrineSchemaSubscriber->addTag('doctrine.event_subscriber', ['connection' => $destinationConnection]);
-
-        $container->setDefinition($this->getSubscriberId($auditorName), $doctrineSchemaSubscriber);
     }
 
     private function defineStorageDoctrine(ContainerBuilder $container, array $storage, string $name): void
@@ -178,6 +169,9 @@ class DrjeleDoctrineAuditExtension extends Extension
                 $this->getEntityManager($entityManager),
             ]
         );
+
+        $connection = $storage['connection'] ?? $entityManager;
+        $definition->addTag('doctrine.event_subscriber', ['connection' => $connection]);
 
         $storageServiceId = $this->getStorageId($name);
 
@@ -226,11 +220,6 @@ class DrjeleDoctrineAuditExtension extends Extension
     private function getStorageId(string $name): string
     {
         return \sprintf('%s.storage.%s', static::BASE_SERVICE_ID, $name);
-    }
-
-    private function getSubscriberId(string $name): string
-    {
-        return \sprintf('%s.subscriber.%s', static::BASE_SERVICE_ID, $name);
     }
 
     private function getAuditorId(string $name): string

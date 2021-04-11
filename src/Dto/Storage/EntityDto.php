@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto\Storage;
 
+use Drjele\DoctrineAudit\Exception\Exception;
+
 class EntityDto
 {
     use EntityDtoTrait;
@@ -24,6 +26,10 @@ class EntityDto
 
     public function __construct(string $operation, string $class, array $columns)
     {
+        if (!\in_array($operation, static::OPERATIONS, true)) {
+            throw new Exception(\sprintf('invalid audit operation "%s"', $operation));
+        }
+
         $this->operation = $operation;
         $this->class = $class;
         $this->columns = $columns;
