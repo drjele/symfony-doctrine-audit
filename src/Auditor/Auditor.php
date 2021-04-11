@@ -13,14 +13,17 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Contract\TransactionProviderInterface;
 use Drjele\DoctrineAudit\Dto\Auditor\AuditorDto;
 use Drjele\DoctrineAudit\Dto\Auditor\EntityDto as AuditorEntityDto;
-use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
+use Drjele\DoctrineAudit\Dto\ColumnDto;
+use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
+use PDO;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -62,7 +65,6 @@ final class Auditor implements EventSubscriber
         try {
             $unitOfWork = $this->entityManager->getUnitOfWork();
 
-            /** @todo compute deletions transactions here */
             $entitiesToDelete = $this->filterAuditedEntities($unitOfWork->getScheduledEntityDeletions());
 
             $entitiesToInsert = $this->filterAuditedEntities($unitOfWork->getScheduledEntityInsertions());
@@ -74,6 +76,8 @@ final class Auditor implements EventSubscriber
             }
 
             $this->auditorDto = new AuditorDto($entitiesToDelete, $entitiesToInsert, $entitiesToUpdate);
+
+            $this->createAuditEntities($entitiesToDelete, StorageEntityDto::OPERATION_DELETE);
         } catch (Throwable $t) {
             $this->handleThrowable($t);
         }
@@ -90,14 +94,144 @@ final class Auditor implements EventSubscriber
             $storageDto = $this->createStorageDto();
 
             $this->storage->save($storageDto);
-
+        } catch (Throwable $t) {
+            $this->handleThrowable($t);
+        } finally {
             /* reset auditor state */
             $this->auditorDto = null;
 
             \gc_collect_cycles();
-        } catch (Throwable $t) {
-            $this->handleThrowable($t);
         }
+    }
+
+    private function createAuditEntities(array $entities, string $operation): void
+    {
+        $auditor = $this->auditorDto;
+        $unitOfWork = $this->entityManager->getUnitOfWork();
+
+        foreach ($entities as $entity) {
+            $entityData = \array_merge(
+                $this->getOriginalEntityData($entity),
+                $unitOfWork->getEntityIdentifier($entity)
+            );
+
+            $entityDto = $this->createAuditorEntityDto(
+                $this->entityManager->getClassMetadata(\get_class($entity)),
+                $entityData,
+                $operation
+            );
+
+            $auditor->addAuditEntity($entityDto);
+        }
+    }
+
+    private function createAuditorEntityDto(
+        ClassMetadata $class,
+        array $entityData,
+        string $operation
+    ): AuditorEntityDto {
+        $unitOfWork = $this->entityManager->getUnitOfWork();
+
+        $fields = [];
+
+        $auditorEntityDto = new AuditorEntityDto($operation, $class->getName());
+
+        foreach ($class->associationMappings as $field => $association) {
+            if ($class->isInheritanceTypeJoined() && $class->isInheritedAssociation($field)) {
+                continue;
+            }
+            if (!(($association['type'] & ClassMetadata::TO_ONE) > 0 && $association['isOwningSide'])) {
+                continue;
+            }
+
+            $data = $entityData[$field] ?? null;
+            $relatedId = false;
+
+            if (null !== $data && $unitOfWork->isInIdentityMap($data)) {
+                $relatedId = $unitOfWork->getEntityIdentifier($data);
+            }
+
+            $targetClass = $this->entityManager->getClassMetadata($association['targetEntity']);
+
+            foreach ($association['sourceToTargetKeyColumns'] as $sourceColumn => $targetColumn) {
+                $fields[$sourceColumn] = true;
+
+                if (null === $data) {
+                    $value = null;
+                    $type = (string)PDO::PARAM_STR;
+                } else {
+                    $value = $relatedId ? $relatedId[$targetClass->fieldNames[$targetColumn]] : null;
+                    /** @todo refactor to not use deprecated method */
+                    $type = $targetClass->getTypeOfColumn($targetColumn);
+                }
+
+                $auditorEntityDto->addColumn(new ColumnDto($sourceColumn, $value, $type));
+            }
+        }
+
+        foreach ($class->fieldNames as $field) {
+            if (\array_key_exists($field, $fields)) {
+                continue;
+            }
+
+            if ($class->isInheritanceTypeJoined()
+                && $class->isInheritedField($field)
+                && !$class->isIdentifier($field)
+            ) {
+                continue;
+            }
+
+            $value = $entityData[$field] ?? null;
+            $type = $class->fieldMappings[$field]['type'];
+
+            $auditorEntityDto->addColumn(new ColumnDto($field, $value, $type));
+        }
+
+        if ($class->isInheritanceTypeSingleTable()) {
+            $auditorEntityDto->addColumn(
+                new ColumnDto(
+                    $class->discriminatorColumn['name'],
+                    $class->discriminatorValue,
+                    $class->discriminatorColumn['type']
+                )
+            );
+        } elseif ($class->isInheritanceTypeJoined()
+            && $class->name === $class->rootEntityName
+        ) {
+            $auditorEntityDto->addColumn(
+                new ColumnDto(
+                    $class->discriminatorColumn['name'],
+                    $entityData[$class->discriminatorColumn['name']],
+                    $class->discriminatorColumn['type']
+                )
+            );
+        }
+
+        if ($class->isInheritanceTypeJoined() && $class->name !== $class->rootEntityName) {
+            throw new Exception('test this functionality');
+            $entityData[$class->discriminatorColumn['name']] = $class->discriminatorValue;
+
+            return $this->createAuditorEntityDto(
+                $this->entityManager->getClassMetadata($class->rootEntityName),
+                $entityData,
+                $operation
+            );
+        }
+
+        return $auditorEntityDto;
+    }
+
+    private function getOriginalEntityData($entity)
+    {
+        $class = $this->entityManager->getClassMetadata(\get_class($entity));
+        $data = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
+
+        if ($class->isVersioned) {
+            $versionField = $class->versionField;
+            $data[$versionField] = $class->reflFields[$versionField]->getValue($entity);
+        }
+
+        return $data;
     }
 
     private function createStorageDto(): StorageDto
@@ -105,14 +239,14 @@ final class Auditor implements EventSubscriber
         $transaction = $this->transactionProvider->getTransaction();
 
         $entities = \array_map(
-            function (AuditorEntityDto $transactionDto) {
-                return new EntityDto(
-                    $transactionDto->getOperation(),
-                    $transactionDto->getClass(),
-                    $transactionDto->getColumns()
+            function (AuditorEntityDto $entityDto): StorageEntityDto {
+                return new StorageEntityDto(
+                    $entityDto->getOperation(),
+                    $entityDto->getClass(),
+                    $entityDto->getColumns()
                 );
             },
-            $this->auditorDto->getEntities()
+            $this->auditorDto->getAuditEntities()
         );
 
         return new StorageDto($transaction, $entities);
