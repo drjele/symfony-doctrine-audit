@@ -79,13 +79,7 @@ class DoctrineSchemaSubscriber implements EventSubscriber
         $primaryKeyColumns[] = static::AUDIT_TRANSACTION_ID;
         $auditTable->setPrimaryKey($primaryKeyColumns);
 
-        $auditTable->addIndex([static::AUDIT_TRANSACTION_ID], static::AUDIT_TRANSACTION_ID)
-            ->addForeignKeyConstraint(
-                static::AUDIT_TRANSACTION,
-                [static::AUDIT_TRANSACTION_ID],
-                ['id'],
-                ['onDelete' => 'RESTRICT']
-            );
+        $auditTable->addIndex([static::AUDIT_TRANSACTION_ID], static::AUDIT_TRANSACTION_ID);
     }
 
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs): void
@@ -105,5 +99,18 @@ class DoctrineSchemaSubscriber implements EventSubscriber
         $transactionTable->addColumn('created', 'datetime');
 
         $transactionTable->setPrimaryKey(['id']);
+
+        foreach ($schema->getTables() as $table) {
+            if ($table->getName() == static::AUDIT_TRANSACTION) {
+                continue;
+            }
+
+            $table->addForeignKeyConstraint(
+                static::AUDIT_TRANSACTION,
+                [static::AUDIT_TRANSACTION_ID],
+                ['id'],
+                ['onDelete' => 'RESTRICT']
+            );
+        }
     }
 }
