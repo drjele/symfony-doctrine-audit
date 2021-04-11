@@ -11,15 +11,15 @@ namespace Drjele\DoctrineAudit\Dto\Storage;
 /** @todo add the option of extra data */
 class TransactionDto
 {
-    private ?int $transactionId;
+    private string $username;
 
-    public function __construct(?int $transactionId)
+    public function __construct(string $username)
     {
-        $this->transactionId = $transactionId;
+        $this->username = $username;
     }
 
-    public function getTransactionId(): ?int
+    public function getUsername(): string
     {
-        return $this->transactionId;
+        return $this->username;
     }
 }

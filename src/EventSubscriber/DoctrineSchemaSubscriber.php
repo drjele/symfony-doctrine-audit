@@ -19,7 +19,10 @@ use Drjele\DoctrineAudit\Exception\Exception;
 
 class DoctrineSchemaSubscriber implements EventSubscriber
 {
+    /** @todo move to config */
+    private const AUDIT_TRANSACTION = 'audit_transaction';
     private const AUDIT_TRANSACTION_ID = 'audit_transaction_id';
+    private const AUDIT_TRANSACTION_ID_TYPE = 'integer';
 
     public function getSubscribedEvents()
     {
@@ -63,10 +66,10 @@ class DoctrineSchemaSubscriber implements EventSubscriber
                 )
             );
         }
-        $auditTable->addColumn(static::AUDIT_TRANSACTION_ID, 'integer');
+        $auditTable->addColumn(static::AUDIT_TRANSACTION_ID, static::AUDIT_TRANSACTION_ID_TYPE);
         $auditTable->addColumn(
             'audit_operation',
-            'enum',
+            'string',
             [
                 'columnDefinition' => \sprintf('ENUM("%s", "%s", "%s")', ...EntityDto::OPERATIONS),
             ]
@@ -75,12 +78,32 @@ class DoctrineSchemaSubscriber implements EventSubscriber
         $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
         $primaryKeyColumns[] = static::AUDIT_TRANSACTION_ID;
         $auditTable->setPrimaryKey($primaryKeyColumns);
-        $transactionIndexName = static::AUDIT_TRANSACTION_ID . '_' . \md5($auditTable->getName()) . '_idx';
-        $auditTable->addIndex([static::AUDIT_TRANSACTION_ID], $transactionIndexName);
+
+        $auditTable->addIndex([static::AUDIT_TRANSACTION_ID], static::AUDIT_TRANSACTION_ID)
+            ->addForeignKeyConstraint(
+                static::AUDIT_TRANSACTION,
+                [static::AUDIT_TRANSACTION_ID],
+                ['id'],
+                ['onDelete' => 'RESTRICT']
+            );
     }
 
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs): void
     {
-        /* @todo add transaction table */
+        $schema = $eventArgs->getSchema();
+
+        $transactionTable = $schema->createTable(static::AUDIT_TRANSACTION);
+
+        $transactionTable->addColumn(
+            'id',
+            static::AUDIT_TRANSACTION_ID_TYPE,
+            [
+                'autoincrement' => true,
+            ]
+        );
+        $transactionTable->addColumn('username', 'string')->setNotnull(false);
+        $transactionTable->addColumn('created', 'datetime');
+
+        $transactionTable->setPrimaryKey(['id']);
     }
 }

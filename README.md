@@ -20,7 +20,7 @@ drjele_doctrine_audit:
     storages:
         doctrine:
             type: doctrine
-            entity_manager: default
+            entity_manager: audit_em
         file:
             type: file
             file: '%kernel.project_dir%/var/audit.log'
@@ -29,15 +29,15 @@ drjele_doctrine_audit:
             service: Acme\Common\Service\AuditStorageService
     auditors:
         doctrine:
-            entity_manager: default
+            entity_manager: em_one
             storage: doctrine
             user_provider: Acme\Common\Service\AuditUserProviderService
         file:
-            entity_manager: default
+            entity_manager: em_two
             storage: file
             user_provider: Acme\Common\Service\AuditUserProviderService
         custom:
-            entity_manager: default
+            entity_manager: em_three
             storage: custom
             user_provider: Acme\Common\Service\AuditUserProviderService
 ```
