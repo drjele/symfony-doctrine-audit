@@ -11,6 +11,7 @@ namespace Drjele\DoctrineAudit\DependencyInjection;
 use Drjele\DoctrineAudit\Auditor\Auditor;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\CreateCommand;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\UpdateCommand;
+use Drjele\DoctrineAudit\EventSubscriber\DoctrineSchemaSubscriber;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Drjele\DoctrineAudit\Storage\DoctrineStorage;
@@ -130,8 +131,7 @@ class DrjeleDoctrineAuditExtension extends Extension
             $container,
             $auditorName,
             $sourceEntityManagerReference,
-            $destinationEntityManagerReference,
-            $destinationConnection
+            $destinationEntityManagerReference
         ): void {
             $definition = new Definition(
                 $commandClass,
@@ -142,8 +142,7 @@ class DrjeleDoctrineAuditExtension extends Extension
                 ]
             );
 
-            $definition->addTag('doctrine.event_subscriber', ['connection' => $destinationConnection])
-                ->addTag('console.command');
+            $definition->addTag('console.command');
 
             $container->setDefinition(
                 $this->getCommandId(\sprintf('%s.%s', $commandName, $auditorName)),
@@ -154,6 +153,12 @@ class DrjeleDoctrineAuditExtension extends Extension
         $defineCommand(CreateCommand::class, 'create');
 
         $defineCommand(UpdateCommand::class, 'update');
+
+        $doctrineSchemaSubscriber = new Definition(DoctrineSchemaSubscriber::class);
+
+        $doctrineSchemaSubscriber->addTag('doctrine.event_subscriber', ['connection' => $destinationConnection]);
+
+        $container->setDefinition($this->getSubscriberId($auditorName), $doctrineSchemaSubscriber);
     }
 
     private function defineStorageDoctrine(ContainerBuilder $container, array $storage, string $name): void
@@ -221,6 +226,11 @@ class DrjeleDoctrineAuditExtension extends Extension
     private function getStorageId(string $name): string
     {
         return \sprintf('%s.storage.%s', static::BASE_SERVICE_ID, $name);
+    }
+
+    private function getSubscriberId(string $name): string
+    {
+        return \sprintf('%s.subscriber.%s', static::BASE_SERVICE_ID, $name);
     }
 
     private function getAuditorId(string $name): string
