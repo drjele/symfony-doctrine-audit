@@ -8,16 +8,14 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto\Auditor;
 
+use Drjele\DoctrineAudit\Dto\AbstractEntityDto;
 use Drjele\DoctrineAudit\Dto\ColumnDto;
 use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
-use Drjele\DoctrineAudit\Dto\Storage\EntityDtoTrait;
 use Drjele\DoctrineAudit\Exception\Exception;
 
-class EntityDto
+class EntityDto extends AbstractEntityDto
 {
-    use EntityDtoTrait;
-
-    public function __construct(string $operation, string $class)
+    public function __construct(string $operation, string $class, string $tableName)
     {
         if (!\in_array($operation, StorageEntityDto::OPERATIONS, true)) {
             throw new Exception(\sprintf('invalid audit operation "%s"', $operation));
@@ -25,6 +23,7 @@ class EntityDto
 
         $this->operation = $operation;
         $this->class = $class;
+        $this->tableName = $tableName;
         $this->columns = [];
     }
 

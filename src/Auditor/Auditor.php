@@ -140,7 +140,7 @@ final class Auditor implements EventSubscriber
     ): AuditorEntityDto {
         $unitOfWork = $this->entityManager->getUnitOfWork();
 
-        $auditorEntityDto = new AuditorEntityDto($operation, $class->getName());
+        $auditorEntityDto = new AuditorEntityDto($operation, $class->getName(), $class->getTableName());
 
         foreach ($class->getAssociationMappings() as $field => $association) {
             if ($class->isInheritanceTypeJoined() && $class->isInheritedAssociation($field)) {
@@ -225,6 +225,7 @@ final class Auditor implements EventSubscriber
                 return new StorageEntityDto(
                     $entityDto->getOperation(),
                     $entityDto->getClass(),
+                    $entityDto->getTableName(),
                     $entityDto->getColumns()
                 );
             },
