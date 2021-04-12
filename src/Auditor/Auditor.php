@@ -123,24 +123,34 @@ final class Auditor implements EventSubscriber
                 $unitOfWork->getEntityIdentifier($entity)
             );
 
-            $entityDto = $this->createAuditorEntityDto(
+            $entityDtos = $this->createAuditorEntityDtos(
                 $this->entityManager->getClassMetadata(\get_class($entity)),
                 $entityData,
                 $operation
             );
 
-            $auditor->addAuditEntity($entityDto);
+            foreach ($entityDtos as $entityDto) {
+                $auditor->addAuditEntity($entityDto);
+            }
         }
     }
 
-    private function createAuditorEntityDto(
+    private function createAuditorEntityDtos(
         ClassMetadata $class,
         array $entityData,
         string $operation
-    ): AuditorEntityDto {
+    ): array {
+        $entityDtos = [];
+
         $unitOfWork = $this->entityManager->getUnitOfWork();
 
-        $auditorEntityDto = new AuditorEntityDto($operation, $class->getName(), $class->getTableName());
+        $auditorEntityDto = new AuditorEntityDto(
+            $operation,
+            $class->getName(),
+            $this->getTableName($class)
+        );
+
+        $entityDtos[] = $auditorEntityDto;
 
         foreach ($class->getAssociationMappings() as $field => $association) {
             if ($class->isInheritanceTypeJoined() && $class->isInheritedAssociation($field)) {
@@ -152,7 +162,6 @@ final class Auditor implements EventSubscriber
             }
 
             $data = $entityData[$field] ?? null;
-            $relatedId = false;
 
             if (null !== $data && $unitOfWork->isInIdentityMap($data)) {
                 $relatedId = $unitOfWork->getEntityIdentifier($data);
@@ -160,15 +169,14 @@ final class Auditor implements EventSubscriber
 
             $targetClass = $this->entityManager->getClassMetadata($association['targetEntity']);
 
-            foreach ($association['sourceToTargetKeyColumns'] as $sourceColumn => $targetColumn) {
+            foreach ($association['joinColumns'] as $joinColumn) {
+                $sourceColumn = $this->getJoinColumnName($joinColumn, $class);
+
                 /** @todo refactor to not use deprecated method */
+                $targetColumn = $targetClass->getFieldForColumn($joinColumn['referencedColumnName']);
                 $type = $targetClass->getTypeOfColumn($targetColumn);
 
-                if (null === $data) {
-                    $value = null;
-                } else {
-                    $value = $relatedId ? $relatedId[$targetClass->getFieldForColumn($targetColumn)] : null;
-                }
+                $value = $relatedId[$targetColumn] ?? null;
 
                 $auditorEntityDto->addColumn(
                     new ColumnDto($field, $sourceColumn, $type, $value)
@@ -192,7 +200,60 @@ final class Auditor implements EventSubscriber
             );
         }
 
-        return $auditorEntityDto;
+        if ($class->isInheritanceTypeSingleTable()) {
+            $auditorEntityDto->addColumn(
+                new ColumnDto(
+                    $class->discriminatorColumn['fieldName'],
+                    $class->discriminatorColumn['name'],
+                    $class->discriminatorColumn['type'],
+                    $class->discriminatorValue
+                )
+            );
+        }
+
+        if ($class->isInheritanceTypeJoined()) {
+            $field = $class->discriminatorColumn['fieldName'];
+
+            if (true === $class->isRootEntity()) {
+                $auditorEntityDto->addColumn(
+                    new ColumnDto(
+                        $field,
+                        $class->discriminatorColumn['name'],
+                        $class->discriminatorColumn['type'],
+                        $entityData[$field] ?? null
+                    )
+                );
+            } else {
+                $entityData[$field] = $class->discriminatorValue;
+
+                $entityDtos = \array_merge(
+                    $this->createAuditorEntityDtos(
+                        $this->entityManager->getClassMetadata($class->rootEntityName),
+                        $entityData,
+                        $operation
+                    ),
+                    $entityDtos
+                );
+            }
+        }
+
+        return $entityDtos;
+    }
+
+    private function getJoinColumnName(array $joinColumn, ClassMetadata $class): string
+    {
+        $quoteStrategy = $this->entityManager->getConfiguration()->getQuoteStrategy();
+        $platform = $this->entityManager->getConnection()->getDatabasePlatform();
+
+        return $quoteStrategy->getJoinColumnName($joinColumn, $class, $platform);
+    }
+
+    private function getTableName(ClassMetadata $class): string
+    {
+        $quoteStrategy = $this->entityManager->getConfiguration()->getQuoteStrategy();
+        $platform = $this->entityManager->getConnection()->getDatabasePlatform();
+
+        return $quoteStrategy->getTableName($class, $platform);
     }
 
     private function getColumnName(string $field, ClassMetadata $class): string
