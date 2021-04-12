@@ -10,7 +10,6 @@ namespace Drjele\DoctrineAudit\Auditor;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
@@ -24,7 +23,6 @@ use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
-use PDO;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -56,19 +54,7 @@ final class Auditor implements EventSubscriber
 
     public function getSubscribedEvents()
     {
-        return [Events::postUpdate, Events::onFlush, Events::postFlush];
-    }
-
-    public function postUpdate(LifecycleEventArgs $eventArgs): void
-    {
-        try {
-            $this->createAuditEntities(
-                $this->auditorDto->getEntitiesToUpdate(),
-                StorageEntityDto::OPERATION_UPDATE
-            );
-        } catch (Throwable $t) {
-            $this->handleThrowable($t);
-        }
+        return [Events::onFlush, Events::postFlush];
     }
 
     public function onFlush(OnFlushEventArgs $eventArgs): void
@@ -106,6 +92,11 @@ final class Auditor implements EventSubscriber
             $this->createAuditEntities(
                 $this->auditorDto->getEntitiesToInsert(),
                 StorageEntityDto::OPERATION_INSERT
+            );
+
+            $this->createAuditEntities(
+                $this->auditorDto->getEntitiesToUpdate(),
+                StorageEntityDto::OPERATION_UPDATE
             );
 
             $storageDto = $this->createStorageDto();
@@ -149,14 +140,13 @@ final class Auditor implements EventSubscriber
     ): AuditorEntityDto {
         $unitOfWork = $this->entityManager->getUnitOfWork();
 
-        $fields = [];
-
         $auditorEntityDto = new AuditorEntityDto($operation, $class->getName());
 
-        foreach ($class->associationMappings as $field => $association) {
+        foreach ($class->getAssociationMappings() as $field => $association) {
             if ($class->isInheritanceTypeJoined() && $class->isInheritedAssociation($field)) {
                 continue;
             }
+
             if (!(($association['type'] & ClassMetadata::TO_ONE) > 0 && $association['isOwningSide'])) {
                 continue;
             }
@@ -171,71 +161,46 @@ final class Auditor implements EventSubscriber
             $targetClass = $this->entityManager->getClassMetadata($association['targetEntity']);
 
             foreach ($association['sourceToTargetKeyColumns'] as $sourceColumn => $targetColumn) {
-                $fields[$sourceColumn] = true;
+                /** @todo refactor to not use deprecated method */
+                $type = $targetClass->getTypeOfColumn($targetColumn);
 
                 if (null === $data) {
                     $value = null;
-                    $type = (string)PDO::PARAM_STR;
                 } else {
-                    $value = $relatedId ? $relatedId[$targetClass->fieldNames[$targetColumn]] : null;
-                    /** @todo refactor to not use deprecated method */
-                    $type = $targetClass->getTypeOfColumn($targetColumn);
+                    $value = $relatedId ? $relatedId[$targetClass->getFieldForColumn($targetColumn)] : null;
                 }
 
-                $auditorEntityDto->addColumn(new ColumnDto($sourceColumn, $value, $type));
+                $auditorEntityDto->addColumn(
+                    new ColumnDto($field, $sourceColumn, $type, $value)
+                );
             }
         }
 
-        foreach ($class->fieldNames as $field) {
-            if (\array_key_exists($field, $fields)) {
+        foreach ($class->getFieldNames() as $field) {
+            if (true == $class->isInheritanceTypeJoined()
+                && true == $class->isInheritedField($field)
+                && false == $class->isIdentifier($field)) {
                 continue;
             }
 
-            if ($class->isInheritanceTypeJoined()
-                && $class->isInheritedField($field)
-                && !$class->isIdentifier($field)
-            ) {
-                continue;
-            }
-
+            $columnName = $this->getColumnName($field, $class);
+            $type = $class->getFieldMapping($field)['type'];
             $value = $entityData[$field] ?? null;
-            $type = $class->fieldMappings[$field]['type'];
 
-            $auditorEntityDto->addColumn(new ColumnDto($field, $value, $type));
-        }
-
-        if ($class->isInheritanceTypeSingleTable()) {
             $auditorEntityDto->addColumn(
-                new ColumnDto(
-                    $class->discriminatorColumn['name'],
-                    $class->discriminatorValue,
-                    $class->discriminatorColumn['type']
-                )
-            );
-        } elseif ($class->isInheritanceTypeJoined()
-            && $class->name === $class->rootEntityName
-        ) {
-            $auditorEntityDto->addColumn(
-                new ColumnDto(
-                    $class->discriminatorColumn['name'],
-                    $entityData[$class->discriminatorColumn['name']],
-                    $class->discriminatorColumn['type']
-                )
-            );
-        }
-
-        if ($class->isInheritanceTypeJoined() && $class->name !== $class->rootEntityName) {
-            throw new Exception('test this functionality');
-            $entityData[$class->discriminatorColumn['name']] = $class->discriminatorValue;
-
-            return $this->createAuditorEntityDto(
-                $this->entityManager->getClassMetadata($class->rootEntityName),
-                $entityData,
-                $operation
+                new ColumnDto($field, $columnName, $type, $value)
             );
         }
 
         return $auditorEntityDto;
+    }
+
+    private function getColumnName(string $field, ClassMetadata $class): string
+    {
+        $quoteStrategy = $this->entityManager->getConfiguration()->getQuoteStrategy();
+        $platform = $this->entityManager->getConnection()->getDatabasePlatform();
+
+        return $quoteStrategy->getColumnName($field, $class, $platform);
     }
 
     private function getOriginalEntityData($entity)

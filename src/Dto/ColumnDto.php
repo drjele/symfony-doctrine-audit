@@ -10,29 +10,36 @@ namespace Drjele\DoctrineAudit\Dto;
 
 class ColumnDto
 {
-    private string $name;
-    private $value;
+    private string $fieldName;
+    private string $columnName;
     private string $type;
+    private $value;
 
-    public function __construct(string $name, $value, string $type)
+    public function __construct(string $fieldName, string $columnName, string $type, $value)
     {
-        $this->name = $name;
-        $this->value = $value;
+        $this->fieldName = $fieldName;
+        $this->columnName = $columnName;
         $this->type = $type;
+        $this->value = $value;
     }
 
-    public function getName(): ?string
+    public function getFieldName(): ?string
     {
-        return $this->name;
+        return $this->fieldName;
     }
 
-    public function getValue()
+    public function getColumnName(): ?string
     {
-        return $this->value;
+        return $this->columnName;
     }
 
     public function getType(): ?string
     {
         return $this->type;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
     }
 }
