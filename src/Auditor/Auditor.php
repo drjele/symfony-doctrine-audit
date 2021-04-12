@@ -10,6 +10,7 @@ namespace Drjele\DoctrineAudit\Auditor;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
@@ -55,7 +56,19 @@ final class Auditor implements EventSubscriber
 
     public function getSubscribedEvents()
     {
-        return [Events::onFlush, Events::postFlush];
+        return [Events::postUpdate, Events::onFlush, Events::postFlush];
+    }
+
+    public function postUpdate(LifecycleEventArgs $eventArgs): void
+    {
+        try {
+            $this->createAuditEntities(
+                $this->auditorDto->getEntitiesToUpdate(),
+                StorageEntityDto::OPERATION_UPDATE
+            );
+        } catch (Throwable $t) {
+            $this->handleThrowable($t);
+        }
     }
 
     public function onFlush(OnFlushEventArgs $eventArgs): void
@@ -90,7 +103,11 @@ final class Auditor implements EventSubscriber
                 return;
             }
 
-            /** @todo compute insertions transactions here */
+            $this->createAuditEntities(
+                $this->auditorDto->getEntitiesToInsert(),
+                StorageEntityDto::OPERATION_INSERT
+            );
+
             $storageDto = $this->createStorageDto();
 
             $this->storage->save($storageDto);
