@@ -16,6 +16,7 @@ use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Contract\TransactionProviderInterface;
+use Drjele\DoctrineAudit\Dto\Annotation\EntityDto as AnnotationEntityDto;
 use Drjele\DoctrineAudit\Dto\Auditor\AuditorDto;
 use Drjele\DoctrineAudit\Dto\Auditor\EntityDto as AuditorEntityDto;
 use Drjele\DoctrineAudit\Dto\ColumnDto;
@@ -28,6 +29,7 @@ use Throwable;
 
 final class Auditor implements EventSubscriber
 {
+    /** @var AnnotationReadService[] */
     private array $auditedEntities;
     private EntityManagerInterface $entityManager;
     private StorageInterface $storage;
@@ -282,18 +284,34 @@ final class Auditor implements EventSubscriber
         $transaction = $this->transactionProvider->getTransaction();
 
         $entities = \array_map(
-            function (AuditorEntityDto $entityDto): StorageEntityDto {
+            function (AuditorEntityDto $entityDto): ?StorageEntityDto {
+                $columns = [];
+                /** @var AnnotationEntityDto $annotationEntityDto */
+                $annotationEntityDto = $this->auditedEntities[$entityDto->getClass()];
+
+                foreach ($entityDto->getColumns() as $columnDto) {
+                    if (\in_array($columnDto->getFieldName(), $annotationEntityDto->getIgnoredFields())) {
+                        continue;
+                    }
+
+                    $columns[] = $columnDto;
+                }
+
+                if (!$columns) {
+                    return null;
+                }
+
                 return new StorageEntityDto(
                     $entityDto->getOperation(),
                     $entityDto->getClass(),
                     $entityDto->getTableName(),
-                    $entityDto->getColumns()
+                    $columns
                 );
             },
             $this->auditorDto->getAuditEntities()
         );
 
-        return new StorageDto($transaction, $entities);
+        return new StorageDto($transaction, \array_filter($entities));
     }
 
     private function filterAuditedEntities(array $allEntities): array

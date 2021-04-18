@@ -11,12 +11,12 @@ namespace Drjele\DoctrineAudit\Dto\Annotation;
 class EntityDto
 {
     private string $class;
-    private array $ignoredColumns;
+    private array $ignoredFields;
 
-    public function __construct(string $class, array $ignoredColumns)
+    public function __construct(string $class, array $ignoredFields)
     {
         $this->class = $class;
-        $this->ignoredColumns = $ignoredColumns;
+        $this->ignoredFields = $ignoredFields;
     }
 
     public function getClass(): ?string
@@ -24,8 +24,8 @@ class EntityDto
         return $this->class;
     }
 
-    public function getIgnoredColumns(): ?array
+    public function getIgnoredFields(): ?array
     {
-        return $this->ignoredColumns;
+        return $this->ignoredFields;
     }
 }

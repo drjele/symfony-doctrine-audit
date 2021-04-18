@@ -33,6 +33,7 @@ class AnnotationReadService
         $this->reader = new AnnotationReader();
     }
 
+    /** @return EntityDto[] */
     public function read(EntityManagerInterface $entityManager): array
     {
         $entities = [];

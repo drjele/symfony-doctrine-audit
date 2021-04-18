@@ -52,6 +52,10 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
 
     public function save(StorageDto $storageDto): void
     {
+        if (!$storageDto->getEntities()) {
+            return;
+        }
+
         $transactionId = $this->getTransactionId($storageDto->getTransaction());
 
         foreach ($storageDto->getEntities() as $entity) {
@@ -89,7 +93,7 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
         $auditedColums = 0;
         foreach ($entityTable->getColumns() as $column) {
             $field = $classMetadata->getFieldForColumn($column->getName());
-            if (\in_array($field, $entityDto->getIgnoredColumns())) {
+            if (\in_array($field, $entityDto->getIgnoredFields())) {
                 continue;
             }
 
