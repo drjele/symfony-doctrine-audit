@@ -60,7 +60,7 @@ class AnnotationReadService
         return $entities;
     }
 
-    private function buildEntityDto(ClassMetadata $metadata): ?EntityDto
+    public function buildEntityDto(ClassMetadata $metadata): ?EntityDto
     {
         $reflection = $metadata->getReflectionClass();
 

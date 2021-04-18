@@ -167,6 +167,7 @@ class DrjeleDoctrineAuditExtension extends Extension
             DoctrineStorage::class,
             [
                 $this->getEntityManager($entityManager),
+                new Reference(AnnotationReadService::class),
             ]
         );
 

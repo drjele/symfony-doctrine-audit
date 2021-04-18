@@ -21,6 +21,7 @@ use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Dto\Storage\TransactionDto;
 use Drjele\DoctrineAudit\Exception\Exception;
+use Drjele\DoctrineAudit\Service\AnnotationReadService;
 
 class DoctrineStorage implements StorageInterface, EventSubscriber
 {
@@ -31,10 +32,14 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
     private const AUDIT_OPERATION = 'audit_operation';
 
     private EntityManagerInterface $entityManager;
+    private AnnotationReadService $annotationReadService;
 
-    public function __construct(EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        AnnotationReadService $annotationReadService
+    ) {
         $this->entityManager = $entityManager;
+        $this->annotationReadService = $annotationReadService;
     }
 
     public function getSubscribedEvents()
@@ -57,6 +62,16 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs): void
     {
         $classMetadata = $eventArgs->getClassMetadata();
+        $schema = $eventArgs->getSchema();
+        $entityTable = $eventArgs->getClassTable();
+
+        /* remove original entity data */
+        $schema->dropTable($entityTable->getName());
+
+        $entityDto = $this->annotationReadService->buildEntityDto($classMetadata);
+        if (null === $entityDto) {
+            return;
+        }
 
         $notSupportedInheritance = [
             ClassMetadataInfo::INHERITANCE_TYPE_NONE,
@@ -69,15 +84,15 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
             );
         }
 
-        $schema = $eventArgs->getSchema();
-        $entityTable = $eventArgs->getClassTable();
-
-        /* remove original entity data */
-        $schema->dropTable($entityTable->getName());
-
         $auditTable = $schema->createTable($entityTable->getName());
 
+        $auditedColums = 0;
         foreach ($entityTable->getColumns() as $column) {
+            $field = $classMetadata->getFieldForColumn($column->getName());
+            if (\in_array($field, $entityDto->getIgnoredColumns())) {
+                continue;
+            }
+
             /* @var Column $column */
             $auditTable->addColumn(
                 $column->getName(),
@@ -87,7 +102,14 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
                     ['notnull' => false, 'autoincrement' => false]
                 )
             );
+
+            ++$auditedColums;
         }
+
+        if (0 == $auditedColums) {
+            return;
+        }
+
         $auditTable->addColumn(static::AUDIT_TRANSACTION_ID, static::AUDIT_TRANSACTION_ID_TYPE);
         $auditTable->addColumn(
             'audit_operation',
