@@ -13,7 +13,7 @@ use Drjele\DoctrineAudit\Command\DoctrineSchema\CreateCommand;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\UpdateCommand;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
-use Drjele\DoctrineAudit\Storage\DoctrineStorage;
+use Drjele\DoctrineAudit\Storage\Doctrine\Storage;
 use Drjele\DoctrineAudit\Storage\FileStorage;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -164,10 +164,11 @@ class DrjeleDoctrineAuditExtension extends Extension
         }
 
         $definition = new Definition(
-            DoctrineStorage::class,
+            Storage::class,
             [
                 $this->getEntityManager($entityManager),
                 new Reference(AnnotationReadService::class),
+                $storage['config'] ?? [],
             ]
         );
 

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Storage;
+namespace Drjele\DoctrineAudit\Storage\Doctrine;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
@@ -23,23 +23,20 @@ use Drjele\DoctrineAudit\Dto\Storage\TransactionDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 
-class DoctrineStorage implements StorageInterface, EventSubscriber
+class Storage implements StorageInterface, EventSubscriber
 {
-    /** @todo move to config */
-    private const AUDIT_TRANSACTION = 'audit_transaction';
-    private const AUDIT_TRANSACTION_ID = 'audit_transaction_id';
-    private const AUDIT_TRANSACTION_ID_TYPE = 'integer';
-    private const AUDIT_OPERATION = 'audit_operation';
-
     private EntityManagerInterface $entityManager;
     private AnnotationReadService $annotationReadService;
+    private Config $config;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        AnnotationReadService $annotationReadService
+        AnnotationReadService $annotationReadService,
+        array $config
     ) {
         $this->entityManager = $entityManager;
         $this->annotationReadService = $annotationReadService;
+        $this->config = new Config($config);
     }
 
     public function getSubscribedEvents()
@@ -116,7 +113,10 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
             return;
         }
 
-        $auditTable->addColumn(static::AUDIT_TRANSACTION_ID, static::AUDIT_TRANSACTION_ID_TYPE);
+        $auditTable->addColumn(
+            $this->config->getTransactionIdColumnName(),
+            $this->config->getTransactionIdColumnType()
+        );
         $auditTable->addColumn(
             'audit_operation',
             'string',
@@ -126,21 +126,23 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
         );
 
         $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
-        $primaryKeyColumns[] = static::AUDIT_TRANSACTION_ID;
+        $primaryKeyColumns[] = $this->config->getTransactionIdColumnName();
         $auditTable->setPrimaryKey($primaryKeyColumns);
 
-        $auditTable->addIndex([static::AUDIT_TRANSACTION_ID], static::AUDIT_TRANSACTION_ID);
+        $auditTable->addIndex([$this->config->getTransactionIdColumnName()], $this->config->getTransactionIdColumnName());
     }
 
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs): void
     {
         $schema = $eventArgs->getSchema();
 
-        $transactionTable = $schema->createTable(static::AUDIT_TRANSACTION);
+        $transactionTable = $schema->createTable(
+            $this->config->getTransactionTableName()
+        );
 
         $transactionTable->addColumn(
             'id',
-            static::AUDIT_TRANSACTION_ID_TYPE,
+            $this->config->getTransactionIdColumnType(),
             [
                 'autoincrement' => true,
             ]
@@ -151,13 +153,13 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
         $transactionTable->setPrimaryKey(['id']);
 
         foreach ($schema->getTables() as $table) {
-            if ($table->getName() == static::AUDIT_TRANSACTION) {
+            if ($table->getName() == $this->config->getTransactionTableName()) {
                 continue;
             }
 
             $table->addForeignKeyConstraint(
-                static::AUDIT_TRANSACTION,
-                [static::AUDIT_TRANSACTION_ID],
+                $this->config->getTransactionTableName(),
+                [$this->config->getTransactionIdColumnName()],
                 ['id'],
                 ['onDelete' => 'RESTRICT']
             );
@@ -169,7 +171,7 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
         $connection = $this->entityManager->getConnection();
 
         $connection->insert(
-            static::AUDIT_TRANSACTION,
+            $this->config->getTransactionTableName(),
             [
                 'username' => $transactionDto->getUsername(),
                 'created' => new \DateTime(),
@@ -183,7 +185,7 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
         $platform = $connection->getDatabasePlatform();
 
         $sequenceName = $platform->supportsSequences()
-            ? $platform->getIdentitySequenceName(static::AUDIT_TRANSACTION_ID_TYPE, 'id')
+            ? $platform->getIdentitySequenceName($this->config->getTransactionIdColumnType(), 'id')
             : null;
 
         return (int)$connection->lastInsertId($sequenceName);
@@ -191,9 +193,12 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
 
     private function saveEntity(int $transactionId, EntityDto $entityDto): void
     {
-        $columns = [static::AUDIT_TRANSACTION_ID, static::AUDIT_OPERATION];
+        $columns = [
+            $this->config->getTransactionIdColumnName(),
+            $this->config->getOperationColumnName(),
+        ];
         $values = [$transactionId, $entityDto->getOperation()];
-        $types = [static::AUDIT_TRANSACTION_ID_TYPE, Types::STRING];
+        $types = [$this->config->getTransactionIdColumnType(), Types::STRING];
 
         foreach ($entityDto->getFields() as $columnDto) {
             $columns[] = $columnDto->getColumnName();
