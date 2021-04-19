@@ -11,6 +11,7 @@ namespace Drjele\DoctrineAudit\Storage;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class FileStorage implements StorageInterface
 {
@@ -51,5 +52,7 @@ class FileStorage implements StorageInterface
             'username' => $storageDto->getTransaction()->getUsername(),
             'entities' => $entities,
         ];
+
+        return (new JsonEncoder())->encode($transaction, JsonEncoder::FORMAT);
     }
 }
