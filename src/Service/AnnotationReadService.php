@@ -82,16 +82,25 @@ class AnnotationReadService
             return null;
         }
 
-        $ignoredColumns = [];
+        $ignoredFields = [];
 
         foreach ($reflection->getProperties() as $property) {
             /* @todo add global ignore columns config */
 
-            if ($this->reader->getPropertyAnnotation($property, Ignore::class)) {
-                $ignoredColumns[] = $property->getName();
+            if (false == $this->reader->getPropertyAnnotation($property, Ignore::class)) {
+                continue;
             }
+
+            $field = $property->getName();
+
+            if ($metadata->isIdentifier($field)) {
+                /* identifiers are never ignored */
+                continue;
+            }
+
+            $ignoredFields[] = $field;
         }
 
-        return new EntityDto($metadata->getName(), $ignoredColumns);
+        return new EntityDto($metadata->getName(), $ignoredFields);
     }
 }

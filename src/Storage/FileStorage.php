@@ -10,7 +10,7 @@ namespace Drjele\DoctrineAudit\Storage;
 
 use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
-use Drjele\DoctrineAudit\Exception\Exception;
+use Symfony\Component\Filesystem\Filesystem;
 
 class FileStorage implements StorageInterface
 {
@@ -23,6 +23,33 @@ class FileStorage implements StorageInterface
 
     public function save(StorageDto $storageDto): void
     {
-        throw new Exception('implement');
+        $transaction = $this->buildTransaction($storageDto);
+
+        $filesystem = new Filesystem();
+
+        $filesystem->appendToFile($this->file, $transaction);
+    }
+
+    private function buildTransaction(StorageDto $storageDto): string
+    {
+        $entities = [];
+
+        foreach ($storageDto->getEntities() as $entityDto) {
+            $columns = [];
+
+            foreach ($entityDto->getFields() as $columnDto) {
+                $columns[$columnDto->getName()] = $columnDto->getValue();
+            }
+
+            $entities[] = [
+                'class' => $entityDto->getClass(),
+                'columns' => $columns,
+            ];
+        }
+
+        $transaction = [
+            'username' => $storageDto->getTransaction()->getUsername(),
+            'entities' => $entities,
+        ];
     }
 }

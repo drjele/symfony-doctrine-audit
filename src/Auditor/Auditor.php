@@ -19,7 +19,7 @@ use Drjele\DoctrineAudit\Contract\TransactionProviderInterface;
 use Drjele\DoctrineAudit\Dto\Annotation\EntityDto as AnnotationEntityDto;
 use Drjele\DoctrineAudit\Dto\Auditor\AuditorDto;
 use Drjele\DoctrineAudit\Dto\Auditor\EntityDto as AuditorEntityDto;
-use Drjele\DoctrineAudit\Dto\ColumnDto;
+use Drjele\DoctrineAudit\Dto\FieldDto;
 use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Exception\Exception;
@@ -180,8 +180,8 @@ final class Auditor implements EventSubscriber
 
                 $value = $relatedId[$targetColumn] ?? null;
 
-                $auditorEntityDto->addColumn(
-                    new ColumnDto($field, $sourceColumn, $type, $value)
+                $auditorEntityDto->addField(
+                    new FieldDto($field, $sourceColumn, $type, $value)
                 );
             }
         }
@@ -197,14 +197,14 @@ final class Auditor implements EventSubscriber
             $type = $class->getFieldMapping($field)['type'];
             $value = $entityData[$field] ?? null;
 
-            $auditorEntityDto->addColumn(
-                new ColumnDto($field, $columnName, $type, $value)
+            $auditorEntityDto->addField(
+                new FieldDto($field, $columnName, $type, $value)
             );
         }
 
         if ($class->isInheritanceTypeSingleTable()) {
-            $auditorEntityDto->addColumn(
-                new ColumnDto(
+            $auditorEntityDto->addField(
+                new FieldDto(
                     $class->discriminatorColumn['fieldName'],
                     $class->discriminatorColumn['name'],
                     $class->discriminatorColumn['type'],
@@ -217,8 +217,8 @@ final class Auditor implements EventSubscriber
             $field = $class->discriminatorColumn['fieldName'];
 
             if (true === $class->isRootEntity()) {
-                $auditorEntityDto->addColumn(
-                    new ColumnDto(
+                $auditorEntityDto->addField(
+                    new FieldDto(
                         $field,
                         $class->discriminatorColumn['name'],
                         $class->discriminatorColumn['type'],
@@ -285,19 +285,19 @@ final class Auditor implements EventSubscriber
 
         $entities = \array_map(
             function (AuditorEntityDto $entityDto): ?StorageEntityDto {
-                $columns = [];
+                $fields = [];
                 /** @var AnnotationEntityDto $annotationEntityDto */
                 $annotationEntityDto = $this->auditedEntities[$entityDto->getClass()];
 
-                foreach ($entityDto->getColumns() as $columnDto) {
-                    if (\in_array($columnDto->getFieldName(), $annotationEntityDto->getIgnoredFields())) {
+                foreach ($entityDto->getFields() as $fieldDto) {
+                    if (\in_array($fieldDto->getName(), $annotationEntityDto->getIgnoredFields())) {
                         continue;
                     }
 
-                    $columns[] = $columnDto;
+                    $fields[] = $fieldDto;
                 }
 
-                if (!$columns) {
+                if (!$fields) {
                     return null;
                 }
 
@@ -305,7 +305,7 @@ final class Auditor implements EventSubscriber
                     $entityDto->getOperation(),
                     $entityDto->getClass(),
                     $entityDto->getTableName(),
-                    $columns
+                    $fields
                 );
             },
             $this->auditorDto->getAuditEntities()

@@ -8,24 +8,24 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto;
 
-class ColumnDto
+class FieldDto
 {
-    private string $fieldName;
+    private string $name;
     private string $columnName;
     private string $type;
     private $value;
 
-    public function __construct(string $fieldName, string $columnName, string $type, $value)
+    public function __construct(string $name, string $columnName, string $type, $value)
     {
-        $this->fieldName = $fieldName;
+        $this->name = $name;
         $this->columnName = $columnName;
         $this->type = $type;
         $this->value = $value;
     }
 
-    public function getFieldName(): ?string
+    public function getName(): ?string
     {
-        return $this->fieldName;
+        return $this->name;
     }
 
     public function getColumnName(): ?string

@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Dto\Auditor;
 
 use Drjele\DoctrineAudit\Dto\AbstractEntityDto;
-use Drjele\DoctrineAudit\Dto\ColumnDto;
+use Drjele\DoctrineAudit\Dto\FieldDto;
 use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 
@@ -24,12 +24,12 @@ class EntityDto extends AbstractEntityDto
         $this->operation = $operation;
         $this->class = $class;
         $this->tableName = $tableName;
-        $this->columns = [];
+        $this->fields = [];
     }
 
-    public function addColumn(ColumnDto $columnDto): self
+    public function addField(FieldDto $fieldDto): self
     {
-        $this->columns[] = $columnDto;
+        $this->fields[] = $fieldDto;
 
         return $this;
     }

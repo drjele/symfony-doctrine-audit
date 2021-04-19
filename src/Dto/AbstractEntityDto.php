@@ -23,7 +23,7 @@ abstract class AbstractEntityDto
     protected string $operation;
     protected string $class;
     protected string $tableName;
-    protected array $columns;
+    protected array $fields;
 
     public function getOperation(): ?string
     {
@@ -40,9 +40,9 @@ abstract class AbstractEntityDto
         return $this->tableName;
     }
 
-    /** @return ColumnDto[] */
-    public function getColumns(): ?array
+    /** @return FieldDto[] */
+    public function getFields(): ?array
     {
-        return $this->columns;
+        return $this->fields;
     }
 }

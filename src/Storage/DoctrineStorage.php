@@ -92,14 +92,16 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
 
         $auditedColums = 0;
         foreach ($entityTable->getColumns() as $column) {
-            $field = $classMetadata->getFieldForColumn($column->getName());
+            $columnName = $column->getName();
+
+            $field = $classMetadata->getFieldForColumn($columnName);
             if (\in_array($field, $entityDto->getIgnoredFields())) {
                 continue;
             }
 
             /* @var Column $column */
             $auditTable->addColumn(
-                $column->getName(),
+                $columnName,
                 $column->getType()->getName(),
                 \array_merge(
                     $column->toArray(),
@@ -193,7 +195,7 @@ class DoctrineStorage implements StorageInterface, EventSubscriber
         $values = [$transactionId, $entityDto->getOperation()];
         $types = [static::AUDIT_TRANSACTION_ID_TYPE, Types::STRING];
 
-        foreach ($entityDto->getColumns() as $columnDto) {
+        foreach ($entityDto->getFields() as $columnDto) {
             $columns[] = $columnDto->getColumnName();
             $values[] = $columnDto->getValue();
             $types[] = $columnDto->getType();
