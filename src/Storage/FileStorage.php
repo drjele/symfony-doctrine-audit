@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Storage;
 
+use DateTime;
 use Drjele\DoctrineAudit\Contract\StorageInterface;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Symfony\Component\Filesystem\Filesystem;
@@ -28,7 +29,7 @@ class FileStorage implements StorageInterface
 
         $filesystem = new Filesystem();
 
-        $filesystem->appendToFile($this->file, $transaction);
+        $filesystem->appendToFile($this->file, $transaction . \PHP_EOL);
     }
 
     private function buildTransaction(StorageDto $storageDto): string
@@ -50,6 +51,7 @@ class FileStorage implements StorageInterface
 
         $transaction = [
             'username' => $storageDto->getTransaction()->getUsername(),
+            'date' => (new DateTime())->format('Y-m-d H:i:s'),
             'entities' => $entities,
         ];
 
