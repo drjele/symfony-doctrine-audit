@@ -66,9 +66,10 @@ class Configuration implements ConfigurationInterface
         $auditors->children()
             ->scalarNode('name')->end()
             ->scalarNode('entity_manager')->defaultValue('default')->end()
-            ->scalarNode('connection')->end()
+            ->scalarNode('connection')->end()/* will use the name of the entity manager if this is not set */
             ->scalarNode('storage')->isRequired()->end()
             ->scalarNode('transaction_provider')->isRequired()->end()
-            ->scalarNode('logger')->end();
+            ->scalarNode('logger')->end()
+            ->arrayNode('ignored_fields')->scalarPrototype()->end();
     }
 }

@@ -29,29 +29,33 @@ use Throwable;
 
 final class Auditor implements EventSubscriber
 {
-    /** @var AnnotationReadService[] */
-    private array $auditedEntities;
+    private Config $config;
     private EntityManagerInterface $entityManager;
     private StorageInterface $storage;
     private TransactionProviderInterface $transactionProvider;
     private ?LoggerInterface $logger;
 
-    /** processing data */
-    private ?AuditorDto $auditorDto = null;
+    /** @var AnnotationReadService[] */
+    private array $auditedEntities;
+    private ?AuditorDto $auditorDto;
 
     public function __construct(
-        AnnotationReadService $annotationReadService,
+        Config $config,
         EntityManagerInterface $entityManager,
         StorageInterface $storage,
         TransactionProviderInterface $transactionProvider,
-        ?LoggerInterface $logger
+        ?LoggerInterface $logger,
+        AnnotationReadService $annotationReadService
     ) {
-        /* @todo read and set entities on cache create */
-        $this->auditedEntities = $annotationReadService->read($entityManager);
+        $this->config = $config;
         $this->entityManager = $entityManager;
         $this->storage = $storage;
         $this->transactionProvider = $transactionProvider;
         $this->logger = $logger;
+
+        /* @todo read and set entities on cache create */
+        $this->auditedEntities = $annotationReadService->read($entityManager);
+        $this->auditorDto = null;
     }
 
     public function getSubscribedEvents()
@@ -291,6 +295,10 @@ final class Auditor implements EventSubscriber
 
                 foreach ($entityDto->getFields() as $fieldDto) {
                     if (\in_array($fieldDto->getName(), $annotationEntityDto->getIgnoredFields())) {
+                        continue;
+                    }
+
+                    if (\in_array($fieldDto->getName(), $this->config->getIgnoredFields())) {
                         continue;
                     }
 
