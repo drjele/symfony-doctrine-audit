@@ -14,6 +14,8 @@ drjele_doctrine_audit:
         doctrine:
             type: doctrine
             entity_manager: audit_em
+            config: # \Drjele\DoctrineAudit\Storage\Doctrine\Config
+                transaction_table_name: 'audit_transaction'
         file:
             type: file
             file: '%kernel.project_dir%/var/audit.log'
@@ -25,6 +27,10 @@ drjele_doctrine_audit:
             entity_manager: source_em_one
             storage: doctrine
             transaction_provider: Acme\Common\Service\AuditTransactionProviderService
+            logger: monolog.logger
+            ignored_fields:
+                - created
+                - modified
         file:
             entity_manager: source_em_two
             storage: file
@@ -43,17 +49,11 @@ This library will register two commands for each auditor with a **doctrine type 
 
 ## Todo
 
-* config.
 * chain storages.
-* ingnored colums.
-* file storage.
 
 ## Purpose
 
-* have audit for specific entities.
-* the audit database to have its own connection.
 * use two step storage for failover and to not slow down the primary application thread.
-* multiple storage types.
 
 ## Inspired by
 

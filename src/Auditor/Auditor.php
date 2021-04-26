@@ -29,7 +29,7 @@ use Throwable;
 
 final class Auditor implements EventSubscriber
 {
-    private Config $config;
+    private Configuration $configuration;
     private EntityManagerInterface $entityManager;
     private StorageInterface $storage;
     private TransactionProviderInterface $transactionProvider;
@@ -40,14 +40,14 @@ final class Auditor implements EventSubscriber
     private ?AuditorDto $auditorDto;
 
     public function __construct(
-        Config $config,
+        Configuration $configuration,
         EntityManagerInterface $entityManager,
         StorageInterface $storage,
         TransactionProviderInterface $transactionProvider,
         ?LoggerInterface $logger,
         AnnotationReadService $annotationReadService
     ) {
-        $this->config = $config;
+        $this->configuration = $configuration;
         $this->entityManager = $entityManager;
         $this->storage = $storage;
         $this->transactionProvider = $transactionProvider;
@@ -298,7 +298,7 @@ final class Auditor implements EventSubscriber
                         continue;
                     }
 
-                    if (\in_array($fieldDto->getName(), $this->config->getIgnoredFields())) {
+                    if (\in_array($fieldDto->getName(), $this->configuration->getIgnoredFields())) {
                         continue;
                     }
 

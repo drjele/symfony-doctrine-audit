@@ -18,14 +18,14 @@ use Drjele\DoctrineAudit\Dto\Storage\TransactionDto;
 final class Storage implements StorageInterface
 {
     private EntityManagerInterface $entityManager;
-    private Config $config;
+    private Configuration $configuration;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        Config $config
+        Configuration $configuration
     ) {
         $this->entityManager = $entityManager;
-        $this->config = $config;
+        $this->configuration = $configuration;
     }
 
     public function save(StorageDto $storageDto): void
@@ -46,7 +46,7 @@ final class Storage implements StorageInterface
         $connection = $this->entityManager->getConnection();
 
         $connection->insert(
-            $this->config->getTransactionTableName(),
+            $this->configuration->getTransactionTableName(),
             [
                 'username' => $transactionDto->getUsername(),
                 'created' => new \DateTime(),
@@ -60,7 +60,7 @@ final class Storage implements StorageInterface
         $platform = $connection->getDatabasePlatform();
 
         $sequenceName = $platform->supportsSequences()
-            ? $platform->getIdentitySequenceName($this->config->getTransactionIdColumnType(), 'id')
+            ? $platform->getIdentitySequenceName($this->configuration->getTransactionIdColumnType(), 'id')
             : null;
 
         return (int)$connection->lastInsertId($sequenceName);
@@ -69,11 +69,11 @@ final class Storage implements StorageInterface
     private function saveEntity(int $transactionId, EntityDto $entityDto): void
     {
         $columns = [
-            $this->config->getTransactionIdColumnName(),
-            $this->config->getOperationColumnName(),
+            $this->configuration->getTransactionIdColumnName(),
+            $this->configuration->getOperationColumnName(),
         ];
         $values = [$transactionId, $entityDto->getOperation()];
-        $types = [$this->config->getTransactionIdColumnType(), Types::STRING];
+        $types = [$this->configuration->getTransactionIdColumnType(), Types::STRING];
 
         foreach ($entityDto->getFields() as $columnDto) {
             $columns[] = $columnDto->getColumnName();

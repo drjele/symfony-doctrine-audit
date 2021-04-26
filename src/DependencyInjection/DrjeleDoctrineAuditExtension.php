@@ -9,13 +9,13 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\DependencyInjection;
 
 use Drjele\DoctrineAudit\Auditor\Auditor;
-use Drjele\DoctrineAudit\Auditor\Config as AuditorConfig;
+use Drjele\DoctrineAudit\Auditor\Configuration as AuditorConfig;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\CreateCommand;
 use Drjele\DoctrineAudit\Command\DoctrineSchema\UpdateCommand;
 use Drjele\DoctrineAudit\EventSubscriber\DoctrineSchemaSubscriber;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
-use Drjele\DoctrineAudit\Storage\Doctrine\Config as DoctrineConfig;
+use Drjele\DoctrineAudit\Storage\Doctrine\Configuration as DoctrineConfig;
 use Drjele\DoctrineAudit\Storage\Doctrine\Storage;
 use Drjele\DoctrineAudit\Storage\FileStorage;
 use Symfony\Component\Config\FileLocator;

@@ -14,26 +14,26 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
-use Drjele\DoctrineAudit\Auditor\Config as AuditorConfig;
+use Drjele\DoctrineAudit\Auditor\Configuration as AuditorConfiguration;
 use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
-use Drjele\DoctrineAudit\Storage\Doctrine\Config as StorageConfig;
+use Drjele\DoctrineAudit\Storage\Doctrine\Configuration as StorageConfiguration;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {
     private AnnotationReadService $annotationReadService;
-    private AuditorConfig $auditorConfig;
-    private StorageConfig $storageConfig;
+    private AuditorConfiguration $auditorConfiguration;
+    private StorageConfiguration $storageConfiguration;
 
     public function __construct(
         AnnotationReadService $annotationReadService,
-        AuditorConfig $auditorConfig,
-        StorageConfig $storageConfig
+        AuditorConfiguration $auditorConfiguration,
+        StorageConfiguration $storageConfiguration
     ) {
         $this->annotationReadService = $annotationReadService;
-        $this->auditorConfig = $auditorConfig;
-        $this->storageConfig = $storageConfig;
+        $this->auditorConfiguration = $auditorConfiguration;
+        $this->storageConfiguration = $storageConfiguration;
     }
 
     public function getSubscribedEvents()
@@ -80,7 +80,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                 continue;
             }
 
-            if (\in_array($field, $this->auditorConfig->getIgnoredFields())) {
+            if (\in_array($field, $this->auditorConfiguration->getIgnoredFields())) {
                 continue;
             }
 
@@ -102,8 +102,8 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         }
 
         $auditTable->addColumn(
-            $this->storageConfig->getTransactionIdColumnName(),
-            $this->storageConfig->getTransactionIdColumnType()
+            $this->storageConfiguration->getTransactionIdColumnName(),
+            $this->storageConfiguration->getTransactionIdColumnType()
         );
         $auditTable->addColumn(
             'audit_operation',
@@ -114,10 +114,13 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         );
 
         $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
-        $primaryKeyColumns[] = $this->storageConfig->getTransactionIdColumnName();
+        $primaryKeyColumns[] = $this->storageConfiguration->getTransactionIdColumnName();
         $auditTable->setPrimaryKey($primaryKeyColumns);
 
-        $auditTable->addIndex([$this->storageConfig->getTransactionIdColumnName()], $this->storageConfig->getTransactionIdColumnName());
+        $auditTable->addIndex(
+            [$this->storageConfiguration->getTransactionIdColumnName()],
+            $this->storageConfiguration->getTransactionIdColumnName()
+        );
     }
 
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs): void
@@ -125,12 +128,12 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $schema = $eventArgs->getSchema();
 
         $transactionTable = $schema->createTable(
-            $this->storageConfig->getTransactionTableName()
+            $this->storageConfiguration->getTransactionTableName()
         );
 
         $transactionTable->addColumn(
             'id',
-            $this->storageConfig->getTransactionIdColumnType(),
+            $this->storageConfiguration->getTransactionIdColumnType(),
             [
                 'autoincrement' => true,
             ]
@@ -141,13 +144,13 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $transactionTable->setPrimaryKey(['id']);
 
         foreach ($schema->getTables() as $table) {
-            if ($table->getName() == $this->storageConfig->getTransactionTableName()) {
+            if ($table->getName() == $this->storageConfiguration->getTransactionTableName()) {
                 continue;
             }
 
             $table->addForeignKeyConstraint(
-                $this->storageConfig->getTransactionTableName(),
-                [$this->storageConfig->getTransactionIdColumnName()],
+                $this->storageConfiguration->getTransactionTableName(),
+                [$this->storageConfiguration->getTransactionIdColumnName()],
                 ['id'],
                 ['onDelete' => 'RESTRICT']
             );

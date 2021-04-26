@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Auditor;
 
-final class Config
+final class Configuration
 {
     private array $ignoredFields;
 
