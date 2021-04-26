@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto\Auditor;
 
-class AuditorDto
+final class AuditorDto
 {
     private array $entitiesToDelete;
     private array $entitiesToInsert;

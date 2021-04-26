@@ -13,7 +13,7 @@ use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class Configuration implements ConfigurationInterface
+final class Configuration implements ConfigurationInterface
 {
     public const TYPE_DOCTRINE = 'doctrine';
     public const TYPE_FILE = 'file';

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto;
 
-class FieldDto
+final class FieldDto
 {
     private string $name;
     private string $columnName;

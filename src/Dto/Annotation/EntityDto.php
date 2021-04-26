@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Dto\Annotation;
 
-class EntityDto
+final class EntityDto
 {
     private string $class;
     private array $ignoredFields;

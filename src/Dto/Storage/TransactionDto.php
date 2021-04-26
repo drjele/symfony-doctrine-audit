@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Dto\Storage;
 
 /** @todo add the option of extra data */
-class TransactionDto
+final class TransactionDto
 {
     private string $username;
 

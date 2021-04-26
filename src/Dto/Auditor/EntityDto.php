@@ -13,7 +13,7 @@ use Drjele\DoctrineAudit\Dto\FieldDto;
 use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 
-class EntityDto extends AbstractEntityDto
+final class EntityDto extends AbstractEntityDto
 {
     public function __construct(string $operation, string $class, string $tableName)
     {

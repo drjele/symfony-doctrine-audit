@@ -14,7 +14,7 @@ use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
-class FileStorage implements StorageInterface
+final class FileStorage implements StorageInterface
 {
     private string $file;
 

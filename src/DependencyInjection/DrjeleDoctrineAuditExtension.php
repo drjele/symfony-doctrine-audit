@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
-class DrjeleDoctrineAuditExtension extends Extension
+final class DrjeleDoctrineAuditExtension extends Extension
 {
     private const BASE_COMMAND_NAME = 'drjele:doctrine:audit';
     private const BASE_SERVICE_ID = 'drjele_doctrine_audit';

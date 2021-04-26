@@ -15,7 +15,7 @@ use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
 use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
 use Drjele\DoctrineAudit\Dto\Storage\TransactionDto;
 
-class Storage implements StorageInterface
+final class Storage implements StorageInterface
 {
     private EntityManagerInterface $entityManager;
     private Config $config;

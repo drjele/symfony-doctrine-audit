@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Dto\Storage;
 
 /** @info this and all of its children should be read only */
-class StorageDto
+final class StorageDto
 {
     private TransactionDto $transaction;
     private array $entities;

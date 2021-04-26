@@ -24,7 +24,7 @@ use Drjele\DoctrineAudit\Annotation\Ignore;
 use Drjele\DoctrineAudit\Dto\Annotation\EntityDto;
 use Drjele\DoctrineAudit\Exception\Exception;
 
-class AnnotationReadService
+final class AnnotationReadService
 {
     private AnnotationReader $reader;
 

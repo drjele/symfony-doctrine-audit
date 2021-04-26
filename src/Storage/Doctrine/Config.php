@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\DoctrineAudit\Storage\Doctrine;
 
-class Config
+final class Config
 {
     private string $transactionTableName;
     private string $transactionIdColumnName;

@@ -20,7 +20,7 @@ use Drjele\DoctrineAudit\Exception\Exception;
 use Drjele\DoctrineAudit\Service\AnnotationReadService;
 use Drjele\DoctrineAudit\Storage\Doctrine\Config as StorageConfig;
 
-class DoctrineSchemaSubscriber implements EventSubscriber
+final class DoctrineSchemaSubscriber implements EventSubscriber
 {
     private AnnotationReadService $annotationReadService;
     private AuditorConfig $auditorConfig;

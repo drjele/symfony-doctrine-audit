@@ -9,20 +9,16 @@ declare(strict_types=1);
 namespace Drjele\DoctrineAudit\Command\DoctrineSchema;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-class CreateCommand extends AbstractCommand
+final class CreateCommand extends AbstractCommand
 {
-    private const FORCE = 'force';
-
     protected function configure()
     {
         parent::configure();
 
-        $this->setDescription('create the database schema for the corresponding auditor')
-            ->addOption(static::FORCE, null, InputOption::VALUE_NONE, 'run the sql');
+        $this->setDescription('create the database schema for the corresponding auditor');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -42,7 +38,7 @@ class CreateCommand extends AbstractCommand
                 $this->io->writeln(\sprintf('    %s;', $sql));
             }
 
-            $this->writeln('---------------------------------------------------------');
+            $this->writeln('----------------------------------------------------------------------');
 
             $force = true === $input->getOption(static::FORCE);
             if ($force) {
