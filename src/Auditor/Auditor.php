@@ -191,9 +191,9 @@ final class Auditor implements EventSubscriber
         }
 
         foreach ($class->getFieldNames() as $field) {
-            if (true == $class->isInheritanceTypeJoined()
-                && true == $class->isInheritedField($field)
-                && false == $class->isIdentifier($field)) {
+            if (true === $class->isInheritanceTypeJoined()
+                && true === $class->isInheritedField($field)
+                && false === $class->isIdentifier($field)) {
                 continue;
             }
 
@@ -294,11 +294,11 @@ final class Auditor implements EventSubscriber
                 $annotationEntityDto = $this->auditedEntities[$entityDto->getClass()];
 
                 foreach ($entityDto->getFields() as $fieldDto) {
-                    if (\in_array($fieldDto->getName(), $annotationEntityDto->getIgnoredFields())) {
+                    if (\in_array($fieldDto->getName(), $annotationEntityDto->getIgnoredFields(), true)) {
                         continue;
                     }
 
-                    if (\in_array($fieldDto->getName(), $this->configuration->getIgnoredFields())) {
+                    if (\in_array($fieldDto->getName(), $this->configuration->getIgnoredFields(), true)) {
                         continue;
                     }
 

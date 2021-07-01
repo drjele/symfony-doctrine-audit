@@ -30,7 +30,7 @@ abstract class AbstractCommand extends \Drjele\SymfonyCommand\Command\AbstractCo
         $this->destinationEntityManager = $destinationEntityManager;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 

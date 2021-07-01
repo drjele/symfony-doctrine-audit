@@ -51,8 +51,7 @@ final class Configuration implements ConfigurationInterface
             ->scalarNode('connection')->end()/* for doctrine */
             ->scalarNode('file')->end()/* for file */
             ->scalarNode('service')->end()/* for custom */
-            ->arrayNode('config')->scalarPrototype()->end()/* generic node with variable content for extra configs */
-        ;
+            ->arrayNode('config')->scalarPrototype()->end(); /* generic node with variable content for extra configs */
     }
 
     private function attachAuditors(NodeBuilder $root): void

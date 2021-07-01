@@ -2,6 +2,7 @@
 /vendor/
 /.idea/
 /auth.json
+/.php-cs-fixer.cache
 ###> generic ###
 
 ###> squizlabs php codesniffer ###

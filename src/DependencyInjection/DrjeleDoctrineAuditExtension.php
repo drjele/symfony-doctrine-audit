@@ -30,7 +30,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
     private const BASE_COMMAND_NAME = 'drjele:doctrine:audit';
     private const BASE_SERVICE_ID = 'drjele_doctrine_audit';
 
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
             $container,
@@ -165,7 +165,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
                     $this->getEntityManager($entityManager),
                     new Reference($this->getStorageId($storage)),
                     new Reference($transactionProvider),
-                    null == $logger ? $logger : new Reference($logger),
+                    null === $logger ? $logger : new Reference($logger),
                     new Reference(AnnotationReadService::class),
                 ]
             );

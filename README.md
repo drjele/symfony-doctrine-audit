@@ -44,6 +44,7 @@ drjele_doctrine_audit:
 ## Doctrine storage
 
 This library will register two commands for each auditor with a **doctrine type storage**.
+
 * ``drjele:doctrine:audit:schema:create:default`` - will create the audit database schema for auditor **default**.
 * ``drjele:doctrine:audit:schema:update:default`` - will update the audit database schema for auditor **default**.
 

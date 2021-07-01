@@ -76,11 +76,11 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             $columnName = $column->getName();
 
             $field = $classMetadata->getFieldForColumn($columnName);
-            if (\in_array($field, $entityDto->getIgnoredFields())) {
+            if (\in_array($field, $entityDto->getIgnoredFields(), true)) {
                 continue;
             }
 
-            if (\in_array($field, $this->auditorConfiguration->getIgnoredFields())) {
+            if (\in_array($field, $this->auditorConfiguration->getIgnoredFields(), true)) {
                 continue;
             }
 
@@ -97,7 +97,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             ++$auditedColums;
         }
 
-        if (0 == $auditedColums) {
+        if (0 === $auditedColums) {
             return;
         }
 
@@ -144,7 +144,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $transactionTable->setPrimaryKey(['id']);
 
         foreach ($schema->getTables() as $table) {
-            if ($table->getName() == $this->storageConfiguration->getTransactionTableName()) {
+            if ($table->getName() === $this->storageConfiguration->getTransactionTableName()) {
                 continue;
             }
 

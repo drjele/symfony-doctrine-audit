@@ -14,7 +14,7 @@ use Throwable;
 
 final class UpdateCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 

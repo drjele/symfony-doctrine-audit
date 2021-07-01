@@ -80,7 +80,7 @@ final class AnnotationReadService
         foreach ($reflection->getProperties() as $property) {
             /* @todo add global ignore columns config */
 
-            if (false == $this->reader->getPropertyAnnotation($property, Ignore::class)) {
+            if (false === $this->reader->getPropertyAnnotation($property, Ignore::class)) {
                 continue;
             }
 
