@@ -51,6 +51,7 @@ This library will register two commands for each auditor with a **doctrine type 
 ## Todo
 
 * chain storages.
+* unit tests.
 
 ## Purpose
 
