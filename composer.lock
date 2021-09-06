@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fdbb445386e7b334be69e7e0156b5221",
+    "content-hash": "f9ccbc38dd0b83a79fc130925386fa82",
     "packages": [
         {
             "name": "composer/package-versions-deprecated",
@@ -1081,16 +1081,16 @@
         },
         {
             "name": "drjele/symfony-command",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-symfony/command.git",
-                "reference": "66694f4373289ffc9416117341412d7e3b0d4214"
+                "reference": "f7937cc834039a17c26192d77b7c8474b4b34966"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fcommand/repository/archive.zip?sha=66694f4373289ffc9416117341412d7e3b0d4214",
-                "reference": "66694f4373289ffc9416117341412d7e3b0d4214",
+                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fcommand/repository/archive.zip?sha=f7937cc834039a17c26192d77b7c8474b4b34966",
+                "reference": "f7937cc834039a17c26192d77b7c8474b4b34966",
                 "shasum": ""
             },
             "require": {
@@ -1143,7 +1143,7 @@
             "support": {
                 "issues": "https://gitlab.com/api/v4/projects/21712419/issues"
             },
-            "time": "2021-07-01T12:05:28+00:00"
+            "time": "2021-09-06T17:33:00+00:00"
         },
         {
             "name": "psr/cache",
