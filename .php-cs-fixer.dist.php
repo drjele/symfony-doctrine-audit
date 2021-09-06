@@ -18,10 +18,12 @@ return (new PhpCsFixer\Config())
             '@Symfony:risky' => true,
             'header_comment' => ['header' => $header],
             'concat_space' => ['spacing' => 'one'],
-            'native_constant_invocation' => ['strict' => false],
-            'native_function_invocation' => ['strict' => false],
+            'native_constant_invocation' => ['include' => ['@all'], 'strict' => true],
+            'native_function_invocation' => ['include' => ['@all'], 'strict' => true],
             'single_line_throw' => false,
-            'multiline_whitespace_before_semicolons' => ['strategy' => 'no_multi_line']
+            'multiline_whitespace_before_semicolons' => ['strategy' => 'no_multi_line'],
+            'cast_spaces' => ['space' => 'none'],
+            'php_unit_test_class_requires_covers' => false
         ]
     )
     ->setRiskyAllowed(true)
