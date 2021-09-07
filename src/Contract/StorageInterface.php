@@ -6,9 +6,9 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Contract;
+namespace Drjele\Doctrine\Audit\Contract;
 
-use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
+use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
 
 interface StorageInterface
 {

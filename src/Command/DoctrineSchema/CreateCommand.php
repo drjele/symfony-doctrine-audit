@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Command\DoctrineSchema;
+namespace Drjele\Doctrine\Audit\Command\DoctrineSchema;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Storage\Doctrine;
+namespace Drjele\Doctrine\Audit\Storage\Doctrine;
 
 final class Configuration
 {

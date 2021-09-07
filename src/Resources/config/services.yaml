@@ -1,2 +1,2 @@
 services:
-    Drjele\DoctrineAudit\Service\AnnotationReadService: ~
+    Drjele\Doctrine\Audit\Service\AnnotationReadService: ~

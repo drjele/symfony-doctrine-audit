@@ -6,18 +6,18 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\DependencyInjection;
+namespace Drjele\Doctrine\Audit\DependencyInjection;
 
-use Drjele\DoctrineAudit\Auditor\Auditor;
-use Drjele\DoctrineAudit\Auditor\Configuration as AuditorConfig;
-use Drjele\DoctrineAudit\Command\DoctrineSchema\CreateCommand;
-use Drjele\DoctrineAudit\Command\DoctrineSchema\UpdateCommand;
-use Drjele\DoctrineAudit\EventSubscriber\DoctrineSchemaSubscriber;
-use Drjele\DoctrineAudit\Exception\Exception;
-use Drjele\DoctrineAudit\Service\AnnotationReadService;
-use Drjele\DoctrineAudit\Storage\Doctrine\Configuration as DoctrineConfig;
-use Drjele\DoctrineAudit\Storage\Doctrine\Storage;
-use Drjele\DoctrineAudit\Storage\FileStorage;
+use Drjele\Doctrine\Audit\Auditor\Auditor;
+use Drjele\Doctrine\Audit\Auditor\Configuration as AuditorConfig;
+use Drjele\Doctrine\Audit\Command\DoctrineSchema\CreateCommand;
+use Drjele\Doctrine\Audit\Command\DoctrineSchema\UpdateCommand;
+use Drjele\Doctrine\Audit\EventSubscriber\DoctrineSchemaSubscriber;
+use Drjele\Doctrine\Audit\Exception\Exception;
+use Drjele\Doctrine\Audit\Service\AnnotationReadService;
+use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as DoctrineConfig;
+use Drjele\Doctrine\Audit\Storage\Doctrine\Storage;
+use Drjele\Doctrine\Audit\Storage\FileStorage;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;

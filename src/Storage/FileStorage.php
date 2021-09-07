@@ -6,11 +6,11 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Storage;
+namespace Drjele\Doctrine\Audit\Storage;
 
 use DateTime;
-use Drjele\DoctrineAudit\Contract\StorageInterface;
-use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
+use Drjele\Doctrine\Audit\Contract\StorageInterface;
+use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 

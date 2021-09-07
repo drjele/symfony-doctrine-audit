@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Dto\Storage;
+namespace Drjele\Doctrine\Audit\Dto\Storage;
 
 /** @info this and all of its children should be read only */
 final class StorageDto

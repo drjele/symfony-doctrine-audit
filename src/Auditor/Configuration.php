@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Auditor;
+namespace Drjele\Doctrine\Audit\Auditor;
 
 final class Configuration
 {

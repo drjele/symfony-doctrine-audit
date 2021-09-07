@@ -6,13 +6,13 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Command\DoctrineSchema;
+namespace Drjele\Doctrine\Audit\Command\DoctrineSchema;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Input\InputOption;
 
-abstract class AbstractCommand extends \Drjele\SymfonyCommand\Command\AbstractCommand
+abstract class AbstractCommand extends \Drjele\Symfony\Command\Command\AbstractCommand
 {
     protected const FORCE = 'force';
 

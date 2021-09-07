@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\EventSubscriber;
+namespace Drjele\Doctrine\Audit\EventSubscriber;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
@@ -14,11 +14,11 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
-use Drjele\DoctrineAudit\Auditor\Configuration as AuditorConfiguration;
-use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
-use Drjele\DoctrineAudit\Exception\Exception;
-use Drjele\DoctrineAudit\Service\AnnotationReadService;
-use Drjele\DoctrineAudit\Storage\Doctrine\Configuration as StorageConfiguration;
+use Drjele\Doctrine\Audit\Auditor\Configuration as AuditorConfiguration;
+use Drjele\Doctrine\Audit\Dto\Storage\EntityDto;
+use Drjele\Doctrine\Audit\Exception\Exception;
+use Drjele\Doctrine\Audit\Service\AnnotationReadService;
+use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as StorageConfiguration;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {

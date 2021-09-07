@@ -6,16 +6,16 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Service;
+namespace Drjele\Doctrine\Audit\Service;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Drjele\DoctrineAudit\Annotation\Auditable;
-use Drjele\DoctrineAudit\Annotation\Ignore;
-use Drjele\DoctrineAudit\Dto\Annotation\EntityDto;
-use Drjele\DoctrineAudit\Exception\Exception;
+use Drjele\Doctrine\Audit\Annotation\Auditable;
+use Drjele\Doctrine\Audit\Annotation\Ignore;
+use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
+use Drjele\Doctrine\Audit\Exception\Exception;
 
 final class AnnotationReadService
 {

@@ -6,14 +6,14 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Storage\Doctrine;
+namespace Drjele\Doctrine\Audit\Storage\Doctrine;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
-use Drjele\DoctrineAudit\Contract\StorageInterface;
-use Drjele\DoctrineAudit\Dto\Storage\EntityDto;
-use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
-use Drjele\DoctrineAudit\Dto\Storage\TransactionDto;
+use Drjele\Doctrine\Audit\Contract\StorageInterface;
+use Drjele\Doctrine\Audit\Dto\Storage\EntityDto;
+use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
+use Drjele\Doctrine\Audit\Dto\Storage\TransactionDto;
 
 final class Storage implements StorageInterface
 {

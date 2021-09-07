@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Dto\Annotation;
+namespace Drjele\Doctrine\Audit\Dto\Annotation;
 
 final class EntityDto
 {

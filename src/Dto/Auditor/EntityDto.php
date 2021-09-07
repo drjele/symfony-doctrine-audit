@@ -6,12 +6,12 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Dto\Auditor;
+namespace Drjele\Doctrine\Audit\Dto\Auditor;
 
-use Drjele\DoctrineAudit\Dto\AbstractEntityDto;
-use Drjele\DoctrineAudit\Dto\FieldDto;
-use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
-use Drjele\DoctrineAudit\Exception\Exception;
+use Drjele\Doctrine\Audit\Dto\AbstractEntityDto;
+use Drjele\Doctrine\Audit\Dto\FieldDto;
+use Drjele\Doctrine\Audit\Dto\Storage\EntityDto as StorageEntityDto;
+use Drjele\Doctrine\Audit\Exception\Exception;
 
 final class EntityDto extends AbstractEntityDto
 {

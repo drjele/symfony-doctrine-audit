@@ -6,9 +6,9 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Contract;
+namespace Drjele\Doctrine\Audit\Contract;
 
-use Drjele\DoctrineAudit\Dto\Storage\TransactionDto;
+use Drjele\Doctrine\Audit\Dto\Storage\TransactionDto;
 
 interface TransactionProviderInterface
 {

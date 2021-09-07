@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Dto;
+namespace Drjele\Doctrine\Audit\Dto;
 
 abstract class AbstractEntityDto
 {

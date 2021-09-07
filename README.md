@@ -14,7 +14,7 @@ drjele_doctrine_audit:
         doctrine:
             type: doctrine
             entity_manager: audit_em
-            config: # \Drjele\DoctrineAudit\Storage\Doctrine\Config
+            config: # \Drjele\Doctrine\Audit\Storage\Doctrine\Config
                 transaction_table_name: 'audit_transaction'
         file:
             type: file
@@ -43,19 +43,19 @@ drjele_doctrine_audit:
 
 ## Doctrine storage
 
-This library will register two commands for each auditor with a **doctrine type storage**.
+This library will register two commands for each auditor with a **doctrine type storage**:
 
-* ``drjele:doctrine:audit:schema:create:default`` - will create the audit database schema for auditor **default**.
-* ``drjele:doctrine:audit:schema:update:default`` - will update the audit database schema for auditor **default**.
+* ``drjele:doctrine:audit:schema:create:<em-name>`` - will create the audit database schema for auditor **default**.
+* ``drjele:doctrine:audit:schema:update:<em-name>`` - will update the audit database schema for auditor **default**.
 
 ## Todo
 
-* chain storages.
-* unit tests.
+* Chain storages.
+* Unit tests.
 
 ## Purpose
 
-* use two step storage for failover and to not slow down the primary application thread.
+* Use two step storage for failover and to not slow down the primary application thread.
 
 ## Inspired by
 

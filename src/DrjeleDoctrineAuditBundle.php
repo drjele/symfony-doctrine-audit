@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit;
+namespace Drjele\Doctrine\Audit;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

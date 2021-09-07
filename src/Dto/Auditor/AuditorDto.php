@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Dto\Auditor;
+namespace Drjele\Doctrine\Audit\Dto\Auditor;
 
 final class AuditorDto
 {

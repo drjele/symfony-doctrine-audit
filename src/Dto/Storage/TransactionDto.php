@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Dto\Storage;
+namespace Drjele\Doctrine\Audit\Dto\Storage;
 
 /** @todo add the option of extra data */
 final class TransactionDto

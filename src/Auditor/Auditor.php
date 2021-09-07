@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\DoctrineAudit\Auditor;
+namespace Drjele\Doctrine\Audit\Auditor;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,16 +14,16 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Drjele\DoctrineAudit\Contract\StorageInterface;
-use Drjele\DoctrineAudit\Contract\TransactionProviderInterface;
-use Drjele\DoctrineAudit\Dto\Annotation\EntityDto as AnnotationEntityDto;
-use Drjele\DoctrineAudit\Dto\Auditor\AuditorDto;
-use Drjele\DoctrineAudit\Dto\Auditor\EntityDto as AuditorEntityDto;
-use Drjele\DoctrineAudit\Dto\FieldDto;
-use Drjele\DoctrineAudit\Dto\Storage\EntityDto as StorageEntityDto;
-use Drjele\DoctrineAudit\Dto\Storage\StorageDto;
-use Drjele\DoctrineAudit\Exception\Exception;
-use Drjele\DoctrineAudit\Service\AnnotationReadService;
+use Drjele\Doctrine\Audit\Contract\StorageInterface;
+use Drjele\Doctrine\Audit\Contract\TransactionProviderInterface;
+use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto as AnnotationEntityDto;
+use Drjele\Doctrine\Audit\Dto\Auditor\AuditorDto;
+use Drjele\Doctrine\Audit\Dto\Auditor\EntityDto as AuditorEntityDto;
+use Drjele\Doctrine\Audit\Dto\FieldDto;
+use Drjele\Doctrine\Audit\Dto\Storage\EntityDto as StorageEntityDto;
+use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
+use Drjele\Doctrine\Audit\Exception\Exception;
+use Drjele\Doctrine\Audit\Service\AnnotationReadService;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
