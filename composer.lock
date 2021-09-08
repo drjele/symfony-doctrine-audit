@@ -1081,16 +1081,16 @@
         },
         {
             "name": "drjele/symfony-command",
-            "version": "v2.0.0",
+            "version": "v2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-symfony/command.git",
-                "reference": "4a4c9df18fae2e1ac561763a84697fff613e7aed"
+                "reference": "2f3fc5028fcaac25640db00140c03d27a2f68f9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fcommand/repository/archive.zip?sha=4a4c9df18fae2e1ac561763a84697fff613e7aed",
-                "reference": "4a4c9df18fae2e1ac561763a84697fff613e7aed",
+                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fcommand/repository/archive.zip?sha=2f3fc5028fcaac25640db00140c03d27a2f68f9a",
+                "reference": "2f3fc5028fcaac25640db00140c03d27a2f68f9a",
                 "shasum": ""
             },
             "require": {
@@ -1143,7 +1143,7 @@
             "support": {
                 "issues": "https://gitlab.com/api/v4/projects/21712419/issues"
             },
-            "time": "2021-09-07T11:13:32+00:00"
+            "time": "2021-09-07T14:50:59+00:00"
         },
         {
             "name": "psr/cache",

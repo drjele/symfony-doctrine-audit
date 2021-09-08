@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\Service;
 
+use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
@@ -80,7 +81,7 @@ final class AnnotationReadService
         foreach ($reflection->getProperties() as $property) {
             /* @todo add global ignore columns config */
 
-            if (false === $this->reader->getPropertyAnnotation($property, Ignore::class)) {
+            if (true !== $this->shouldIgnore($property)) {
                 continue;
             }
 
@@ -95,5 +96,17 @@ final class AnnotationReadService
         }
 
         return new EntityDto($metadata->getName(), $ignoredFields);
+    }
+
+    private function shouldIgnore(\ReflectionProperty $field): bool
+    {
+        /** @var Annotation $ignore */
+        $ignore = $this->reader->getPropertyAnnotation($field, Ignore::class);
+
+        if (null === $ignore) {
+            return false;
+        }
+
+        return true === $ignore->value;
     }
 }

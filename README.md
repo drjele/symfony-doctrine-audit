@@ -4,7 +4,7 @@
 
 Any suggestions are welcomed.
 
-**This is a work in progress**.
+**This is a work in progress**. **ONLY WORKS AFTER TAG 2.1**.
 
 ## Sample config
 
