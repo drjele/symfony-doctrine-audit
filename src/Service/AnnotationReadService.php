@@ -18,7 +18,7 @@ use Drjele\Doctrine\Audit\Annotation\Ignore;
 use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
 use Drjele\Doctrine\Audit\Exception\Exception;
 
-final class AnnotationReadService
+class AnnotationReadService
 {
     private AnnotationReader $reader;
 
@@ -72,7 +72,7 @@ final class AnnotationReadService
             return null;
         }
 
-        if (false === $auditableAnnotation->enabled) {
+        if (false === $auditableAnnotation->value) {
             return null;
         }
 
