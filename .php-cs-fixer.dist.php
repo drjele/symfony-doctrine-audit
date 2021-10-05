@@ -23,7 +23,8 @@ return (new PhpCsFixer\Config())
             'single_line_throw' => false,
             'multiline_whitespace_before_semicolons' => ['strategy' => 'no_multi_line'],
             'cast_spaces' => ['space' => 'none'],
-            'php_unit_test_class_requires_covers' => false
+            'php_unit_test_class_requires_covers' => false,
+            'phpdoc_align' => false,
         ]
     )
     ->setRiskyAllowed(true)
