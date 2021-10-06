@@ -36,7 +36,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $this->auditorConfiguration = $auditorConfiguration;
         $this->storageConfiguration = $storageConfiguration;
 
-        Type::addType(OperationType::class, OperationType::class);
+        Type::addType(OperationType::getDefaultName(), OperationType::class);
     }
 
     public function getSubscribedEvents()
@@ -113,7 +113,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         );
         $auditTable->addColumn(
             $this->storageConfiguration->getOperationColumnName(),
-            OperationType::class,
+            OperationType::getDefaultName(),
             ['notnull' => true]
         );
 

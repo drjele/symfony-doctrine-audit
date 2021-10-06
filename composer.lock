@@ -1087,16 +1087,16 @@
         },
         {
             "name": "drjele/doctrine-type",
-            "version": "v1.0.1",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-doctrine/type.git",
-                "reference": "1cf74a7b5fb7c663d29967a93c5b1f3afbb1f966"
+                "reference": "d9e32fd10a93922f738d266387d758cf12f78aeb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-doctrine%2Ftype/repository/archive.zip?sha=1cf74a7b5fb7c663d29967a93c5b1f3afbb1f966",
-                "reference": "1cf74a7b5fb7c663d29967a93c5b1f3afbb1f966",
+                "url": "https://gitlab.com/api/v4/projects/drjele-doctrine%2Ftype/repository/archive.zip?sha=d9e32fd10a93922f738d266387d758cf12f78aeb",
+                "reference": "d9e32fd10a93922f738d266387d758cf12f78aeb",
                 "shasum": ""
             },
             "require": {
@@ -1142,7 +1142,7 @@
             "support": {
                 "issues": "https://gitlab.com/api/v4/projects/30216425/issues"
             },
-            "time": "2021-10-06T09:13:04+00:00"
+            "time": "2021-10-06T09:48:55+00:00"
         },
         {
             "name": "drjele/symfony-command",
