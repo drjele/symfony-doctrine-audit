@@ -10,15 +10,16 @@ namespace Drjele\Doctrine\Audit\EventSubscriber;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
 use Drjele\Doctrine\Audit\Auditor\Configuration as AuditorConfiguration;
-use Drjele\Doctrine\Audit\Dto\Storage\EntityDto;
 use Drjele\Doctrine\Audit\Exception\Exception;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
 use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as StorageConfiguration;
+use Drjele\Doctrine\Audit\Type\OperationType;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {
@@ -34,6 +35,8 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $this->annotationReadService = $annotationReadService;
         $this->auditorConfiguration = $auditorConfiguration;
         $this->storageConfiguration = $storageConfiguration;
+
+        Type::addType(OperationType::class, OperationType::class);
     }
 
     public function getSubscribedEvents()
@@ -90,7 +93,10 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                 $column->getType()->getName(),
                 \array_merge(
                     $column->toArray(),
-                    ['notnull' => false, 'autoincrement' => false]
+                    [
+                        'notnull' => false,
+                        'autoincrement' => false,
+                    ]
                 )
             );
 
@@ -106,11 +112,9 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             $this->storageConfiguration->getTransactionIdColumnType()
         );
         $auditTable->addColumn(
-            'audit_operation',
-            'string',
-            [
-                'columnDefinition' => \sprintf('ENUM("%s", "%s", "%s")', ...EntityDto::OPERATIONS),
-            ]
+            $this->storageConfiguration->getOperationColumnName(),
+            OperationType::class,
+            ['notnull' => true]
         );
 
         $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
@@ -136,6 +140,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             $this->storageConfiguration->getTransactionIdColumnType(),
             [
                 'autoincrement' => true,
+                'notnull' => true,
             ]
         );
         $transactionTable->addColumn('username', 'string')->setNotnull(false);

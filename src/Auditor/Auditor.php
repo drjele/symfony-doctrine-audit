@@ -16,6 +16,7 @@ use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Drjele\Doctrine\Audit\Contract\StorageInterface;
 use Drjele\Doctrine\Audit\Contract\TransactionProviderInterface;
+use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
 use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto as AnnotationEntityDto;
 use Drjele\Doctrine\Audit\Dto\Auditor\AuditorDto;
 use Drjele\Doctrine\Audit\Dto\Auditor\EntityDto as AuditorEntityDto;
@@ -35,7 +36,7 @@ final class Auditor implements EventSubscriber
     private TransactionProviderInterface $transactionProvider;
     private ?LoggerInterface $logger;
 
-    /** @var AnnotationReadService[] */
+    /** @var EntityDto[] */
     private array $auditedEntities;
     private ?AuditorDto $auditorDto;
 
@@ -84,7 +85,7 @@ final class Auditor implements EventSubscriber
 
             $this->createAuditEntities($entitiesToDelete, StorageEntityDto::OPERATION_DELETE);
         } catch (Throwable $t) {
-            $this->handleThrowable($t);
+            $this->throw($t);
         }
     }
 
@@ -109,7 +110,7 @@ final class Auditor implements EventSubscriber
 
             $this->storage->save($storageDto);
         } catch (Throwable $t) {
-            $this->handleThrowable($t);
+            $this->throw($t);
         } finally {
             /* reset auditor state */
             $this->auditorDto = null;
@@ -348,7 +349,7 @@ final class Auditor implements EventSubscriber
         return isset($this->auditedEntities[$entityClass]);
     }
 
-    private function handleThrowable(Throwable $t): void
+    private function throw(Throwable $t): void
     {
         if ($this->logger) {
             $this->logger->error(
