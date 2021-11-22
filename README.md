@@ -62,3 +62,19 @@ This library will register two commands for each auditor with a **doctrine type 
 * https://github.com/xiidea/EasyAuditBundle
 * https://github.com/DamienHarper/auditor-bundle
 * https://github.com/sonata-project/EntityAuditBundle
+
+## Dev
+
+* `git clone git@gitlab.com:drjele-symfony/doctrine-audit.git`
+* `cd command/scripts/docker/`
+* `cp ~/.ssh/id_* ./`
+* `create .profile_personal with:`
+
+```
+echo 'git config --global user.name "<your name>"' >> ./.profile_personal && \
+echo 'git config --global user.email "<your email>"' >> ./.profile_personal
+```
+
+* `docker-compose build && docker-compose up -d`
+* `docker-compose exec php sh`
+* `composer install`

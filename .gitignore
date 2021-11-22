@@ -3,6 +3,8 @@
 /.idea/
 /auth.json
 /.php-cs-fixer.cache
+/scripts/docker/id_*
+/scripts/docker/.profile_personal
 ###> generic ###
 
 ###> squizlabs php codesniffer ###
