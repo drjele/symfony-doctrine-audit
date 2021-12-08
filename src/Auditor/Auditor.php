@@ -32,7 +32,7 @@ final class Auditor implements EventSubscriber
 {
     private Configuration $configuration;
     private EntityManagerInterface $entityManager;
-    private StorageInterface $storage;
+    private array $storages;
     private TransactionProviderInterface $transactionProvider;
     private ?LoggerInterface $logger;
 
@@ -43,14 +43,14 @@ final class Auditor implements EventSubscriber
     public function __construct(
         Configuration $configuration,
         EntityManagerInterface $entityManager,
-        StorageInterface $storage,
+        array $storages,
         TransactionProviderInterface $transactionProvider,
         ?LoggerInterface $logger,
         AnnotationReadService $annotationReadService
     ) {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
-        $this->storage = $storage;
+        $this->storages = $storages;
         $this->transactionProvider = $transactionProvider;
         $this->logger = $logger;
 
@@ -108,7 +108,7 @@ final class Auditor implements EventSubscriber
 
             $storageDto = $this->createStorageDto();
 
-            $this->storage->save($storageDto);
+            $this->save($storageDto);
         } catch (Throwable $t) {
             $this->throw($t);
         } finally {
@@ -116,6 +116,16 @@ final class Auditor implements EventSubscriber
             $this->auditorDto = null;
 
             \gc_collect_cycles();
+        }
+    }
+
+    private function save(StorageDto $storageDto): void
+    {
+        /** @var StorageInterface $storage */
+        foreach ($this->storages as $storage) {
+            /* @todo maybe log each storage */
+
+            $storage->save($storageDto);
         }
     }
 

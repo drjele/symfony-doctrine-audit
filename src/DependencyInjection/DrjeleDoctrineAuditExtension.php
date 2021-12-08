@@ -50,18 +50,18 @@ final class DrjeleDoctrineAuditExtension extends Extension
 
     private function defineStorages(ContainerBuilder $containerBuilder, array $storages): void
     {
-        foreach ($storages as $name => $storage) {
+        foreach ($storages as $storageName => $storage) {
             $type = $storage['type'];
 
             switch ($type) {
                 case Configuration::TYPE_DOCTRINE:
-                    $this->defineStorageDoctrine($containerBuilder, $storage, $name);
+                    $this->defineStorageDoctrine($containerBuilder, $storage, $storageName);
                     break;
                 case Configuration::TYPE_FILE:
-                    $this->defineStorageFile($containerBuilder, $storage, $name);
+                    $this->defineStorageFile($containerBuilder, $storage, $storageName);
                     break;
                 case Configuration::TYPE_CUSTOM:
-                    $this->defineStorageCustom($containerBuilder, $storage, $name);
+                    $this->defineStorageCustom($containerBuilder, $storage, $storageName);
                     break;
                 default:
                     throw new Exception(\sprintf('invalid storage type `%s`', $type));
@@ -72,7 +72,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
     private function defineStorageDoctrine(
         ContainerBuilder $containerBuilder,
         array $storage,
-        string $name
+        string $storageName
     ): void {
         $type = $storage['type'];
         [$entityManager,] = $this->getEntityManagerAndConnection($storage);
@@ -83,24 +83,24 @@ final class DrjeleDoctrineAuditExtension extends Extension
             );
         }
 
-        $this->defineStorageDoctrineConfig($containerBuilder, $name, $storage['config'] ?? []);
+        $this->defineStorageDoctrineConfig($containerBuilder, $storageName, $storage['config'] ?? []);
 
         $definition = new Definition(
             Storage::class,
             [
                 $this->getEntityManager($entityManager),
-                new Reference($this->getStorageConfigId($name)),
+                new Reference($this->getStorageConfigId($storageName)),
             ]
         );
 
-        $storageServiceId = $this->getStorageId($name);
+        $storageServiceId = $this->getStorageId($storageName);
 
         $containerBuilder->setDefinition($storageServiceId, $definition);
     }
 
     private function defineStorageDoctrineConfig(
         ContainerBuilder $containerBuilder,
-        string $name,
+        string $storageName,
         array $config
     ): void {
         $definition = new Definition(
@@ -110,7 +110,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
             ]
         );
 
-        $storageServiceId = $this->getStorageConfigId($name);
+        $storageServiceId = $this->getStorageConfigId($storageName);
 
         $containerBuilder->setDefinition($storageServiceId, $definition);
     }
@@ -118,7 +118,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
     private function defineStorageFile(
         ContainerBuilder $containerBuilder,
         array $storage,
-        string $name
+        string $storageName
     ): void {
         $type = $storage['type'];
         $file = $storage['file'] ?? null;
@@ -136,7 +136,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
             ]
         );
 
-        $storageServiceId = $this->getStorageId($name);
+        $storageServiceId = $this->getStorageId($storageName);
 
         $containerBuilder->setDefinition($storageServiceId, $definition);
     }
@@ -144,7 +144,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
     private function defineStorageCustom(
         ContainerBuilder $containerBuilder,
         array $storage,
-        string $name
+        string $storageName
     ): void {
         $type = $storage['type'];
         $service = $storage['service'] ?? null;
@@ -155,27 +155,32 @@ final class DrjeleDoctrineAuditExtension extends Extension
             );
         }
 
-        $storageServiceId = $this->getStorageId($name);
+        $storageServiceId = $this->getStorageId($storageName);
 
         $containerBuilder->setAlias($storageServiceId, $service);
     }
 
     private function defineAuditors(ContainerBuilder $containerBuilder, array $auditors): void
     {
-        foreach ($auditors as $name => $auditor) {
+        foreach ($auditors as $auditorName => $auditor) {
             [$entityManager, $connection] = $this->getEntityManagerAndConnection($auditor);
-            $storage = $auditor['storage'];
+
             $transactionProvider = $auditor['transaction_provider'];
             $logger = $auditor['logger'] ?? null;
 
-            $this->defineAuditorConfig($containerBuilder, $name, $auditor);
+            $this->defineAuditorConfig($containerBuilder, $auditorName, $auditor);
+
+            $storages = \array_map(
+                fn (string $storage) => new Reference($this->getStorageId($storage)),
+                $auditor['synchronous_storages']
+            );
 
             $definition = new Definition(
                 Auditor::class,
                 [
-                    new Reference($this->getAuditorConfigId($name)),
+                    new Reference($this->getAuditorConfigId($auditorName)),
                     $this->getEntityManager($entityManager),
-                    new Reference($this->getStorageId($storage)),
+                    $storages,
                     new Reference($transactionProvider),
                     null === $logger ? $logger : new Reference($logger),
                     new Reference(AnnotationReadService::class),
@@ -184,40 +189,47 @@ final class DrjeleDoctrineAuditExtension extends Extension
 
             $definition->addTag('doctrine.event_subscriber', ['connection' => $connection]);
 
-            $containerBuilder->setDefinition($this->getAuditorId($name), $definition);
+            $containerBuilder->setDefinition($this->getAuditorId($auditorName), $definition);
         }
     }
 
-    private function defineAuditorConfig(ContainerBuilder $containerBuilder, string $name, array $auditors): void
+    private function defineAuditorConfig(ContainerBuilder $containerBuilder, string $auditorName, array $auditor): void
     {
         $definition = new Definition(
             AuditorConfig::class,
             [
-                $auditors['ignored_fields'] ?? [],
+                $auditor['ignored_fields'] ?? [],
             ]
         );
 
-        $storageServiceId = $this->getAuditorConfigId($name);
+        $storageServiceId = $this->getAuditorConfigId($auditorName);
 
         $containerBuilder->setDefinition($storageServiceId, $definition);
     }
 
     private function defineServices(ContainerBuilder $containerBuilder, array $auditors, array $storages): void
     {
-        foreach ($auditors as $name => $auditor) {
-            $storage = $storages[$auditor['storage']];
-
-            $storageType = $storage['type'];
-
-            switch ($storageType) {
-                case Configuration::TYPE_DOCTRINE:
-                    $this->defineSchemaCommands(
-                        $containerBuilder,
-                        $name,
-                        $auditor,
-                        $storage
+        foreach ($auditors as $auditorName => $auditor) {
+            foreach ($auditor['storages'] as $storageName) {
+                if (!isset($storages[$storageName])) {
+                    throw new Exception(
+                        \sprintf('could not find storage `%s` for auditor `%s`', $storageName, $auditorName)
                     );
-                    break;
+                }
+
+                $storage = $storages[$storageName];
+
+                switch ($storage['type']) {
+                    case Configuration::TYPE_DOCTRINE:
+                        $this->defineSchemaCommands(
+                            $containerBuilder,
+                            $auditorName,
+                            $storageName,
+                            $auditor,
+                            $storage
+                        );
+                        break;
+                }
             }
         }
     }
@@ -225,6 +237,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
     private function defineSchemaCommands(
         ContainerBuilder $containerBuilder,
         string $auditorName,
+        string $storageName,
         array $auditor,
         array $storage
     ): void {
@@ -263,8 +276,6 @@ final class DrjeleDoctrineAuditExtension extends Extension
         $defineCommand(CreateCommand::class, 'create');
 
         $defineCommand(UpdateCommand::class, 'update');
-
-        $storageName = $auditor['storage'];
 
         $definition = new Definition(
             DoctrineSchemaSubscriber::class,

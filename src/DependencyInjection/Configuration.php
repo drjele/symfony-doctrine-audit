@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\DependencyInjection;
 
+use Drjele\Doctrine\Audit\Exception\Exception;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -39,7 +40,7 @@ final class Configuration implements ConfigurationInterface
         $storages = $root->arrayNode('storages')->isRequired()
             ->cannotBeEmpty()
             ->useAttributeAsKey('name')
-            ->prototype('array');
+            ->arrayPrototype();
 
         $types = [static::TYPE_DOCTRINE, static::TYPE_FILE, static::TYPE_CUSTOM];
 
@@ -51,7 +52,7 @@ final class Configuration implements ConfigurationInterface
             ->scalarNode('connection')->end()/* for doctrine */
             ->scalarNode('file')->end()/* for file */
             ->scalarNode('service')->end()/* for custom */
-            ->arrayNode('config')->scalarPrototype()->end(); /* generic node with variable content for extra configs */
+            ->arrayNode('config')->scalarPrototype()->end()->end(); /* generic node with variable content for extra configs */
     }
 
     private function attachAuditors(NodeBuilder $root): void
@@ -60,15 +61,36 @@ final class Configuration implements ConfigurationInterface
         $auditors = $root->arrayNode('auditors')->isRequired()
             ->cannotBeEmpty()
             ->useAttributeAsKey('name')
-            ->prototype('array');
+            ->arrayPrototype();
+
+        $auditors->beforeNormalization()->always(
+            function (array $auditor) {
+                $auditor['synchronous_storages'] ??= $auditor['storages'];
+
+                if ($diff = \array_diff($auditor['synchronous_storages'], $auditor['storages'])) {
+                    throw new Exception(
+                        \sprintf(
+                            'the synchronous storages `%s` were not found in the storages list `%s`',
+                            \implode(', ', $diff),
+                            \implode(', ', $auditor['storages'])
+                        )
+                    );
+                }
+
+                return $auditor;
+            }
+        );
 
         $auditors->children()
             ->scalarNode('name')->end()
             ->scalarNode('entity_manager')->defaultValue('default')->end()
             ->scalarNode('connection')->end()/* will use the name of the entity manager if this is not set */
-            ->scalarNode('storage')->isRequired()->end()
+            /* the complete list of storage used by the auditor */
+            ->arrayNode('storages')->isRequired()->cannotBeEmpty()->scalarPrototype()->end()->end()
+            /* a part of the storages list that are used on \Drjele\Doctrine\Audit\Auditor\Auditor::save */
+            ->arrayNode('synchronous_storages')->cannotBeEmpty()->isRequired()->scalarPrototype()->end()->end()
             ->scalarNode('transaction_provider')->isRequired()->end()
             ->scalarNode('logger')->end()
-            ->arrayNode('ignored_fields')->scalarPrototype()->end();
+            ->arrayNode('ignored_fields')->scalarPrototype()->end()->end();
     }
 }

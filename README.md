@@ -19,13 +19,14 @@ drjele_doctrine_audit:
         file:
             type: file
             file: '%kernel.project_dir%/var/audit.log'
-        custom:
+        rabbit:
             type: custom
             service: Acme\Shared\Service\AuditStorageService
     auditors:
         doctrine:
             entity_manager: source_em_one
-            storage: doctrine
+            storages:
+                - doctrine
             transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
             logger: monolog.logger
             ignored_fields:
@@ -33,11 +34,16 @@ drjele_doctrine_audit:
                 - modified
         file:
             entity_manager: source_em_two
-            storage: file
+            storages:
+                - file
             transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
-        custom:
+        async:
             entity_manager: source_em_three
-            storage: custom
+            storages:
+                - doctrine
+                - rabbit
+            synchronous_storages:
+                - rabbit # the rabbit storage will publish the StorageDto and a consumer will be required to save to the doctrine storage
             transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
 ```
 
@@ -50,8 +56,8 @@ This library will register two commands for each auditor with a **doctrine type 
 
 ## Todo
 
-* Chain storages.
 * Unit tests.
+* catch updates done with \Doctrine\ORM\EntityManagerInterface::getReference.
 
 ## Purpose
 
