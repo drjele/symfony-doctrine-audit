@@ -70,7 +70,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             ];
             if (!\in_array($classMetadata->inheritanceType, $notSupportedInheritance, true)) {
                 throw new Exception(
-                    \sprintf('inheritance type "%s" is not yet supported', $classMetadata->inheritanceType)
+                    \sprintf('inheritance type `%s` is not yet supported', $classMetadata->inheritanceType)
                 );
             }
 

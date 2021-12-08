@@ -14,19 +14,19 @@ drjele_doctrine_audit:
         doctrine:
             type: doctrine
             entity_manager: audit_em
-            config: # \Drjele\Doctrine\Audit\Storage\Doctrine\Config
+            config: # \Drjele\Doctrine\Audit\Storage\Doctrine\Configuration
                 transaction_table_name: 'audit_transaction'
         file:
             type: file
             file: '%kernel.project_dir%/var/audit.log'
         custom:
             type: custom
-            service: Acme\Common\Service\AuditStorageService
+            service: Acme\Shared\Service\AuditStorageService
     auditors:
         doctrine:
             entity_manager: source_em_one
             storage: doctrine
-            transaction_provider: Acme\Common\Service\AuditTransactionProviderService
+            transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
             logger: monolog.logger
             ignored_fields:
                 - created
@@ -34,11 +34,11 @@ drjele_doctrine_audit:
         file:
             entity_manager: source_em_two
             storage: file
-            transaction_provider: Acme\Common\Service\AuditTransactionProviderService
+            transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
         custom:
             entity_manager: source_em_three
             storage: custom
-            transaction_provider: Acme\Common\Service\AuditTransactionProviderService
+            transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
 ```
 
 ## Doctrine storage

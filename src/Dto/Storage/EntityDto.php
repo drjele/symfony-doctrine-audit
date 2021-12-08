@@ -16,7 +16,7 @@ final class EntityDto extends AbstractEntityDto
     public function __construct(string $operation, string $class, string $tableName, array $fields)
     {
         if (!\in_array($operation, static::OPERATIONS, true)) {
-            throw new Exception(\sprintf('invalid audit operation "%s"', $operation));
+            throw new Exception(\sprintf('invalid audit operation `%s`', $operation));
         }
 
         $this->operation = $operation;

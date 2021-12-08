@@ -45,7 +45,7 @@ class AnnotationReadService
 
             if (isset($entities[$entityClass])) {
                 throw new Exception(
-                    \sprintf('duplicate annotation for entity class "%s"', $entityClass)
+                    \sprintf('duplicate annotation for entity class `%s`', $entityClass)
                 );
             }
 
