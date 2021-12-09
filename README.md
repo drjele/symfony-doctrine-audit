@@ -52,6 +52,37 @@ drjele_doctrine_audit:
             transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
 ```
 
+```yaml
+# services.yaml
+services:
+    Acme\Shared\Service\AuditStorageService:
+        arguments:
+            $storage: '@drjele_doctrine_audit.storage.doctrine_two'
+```
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Acme\Shared\Service;
+
+use Drjele\Doctrine\Audit\Contract\TransactionProviderInterface;
+use Drjele\Doctrine\Audit\Dto\Storage\TransactionDto;
+
+final class AuditTransactionProviderService implements TransactionProviderInterface
+{
+    public function getTransaction(): TransactionDto
+    {
+        $username = '~';
+
+        /* @todo implement application specific logic */
+
+        return new TransactionDto($username);
+    }
+}
+```
+
 ```php
 <?php
 
