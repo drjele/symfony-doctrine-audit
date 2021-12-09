@@ -9,9 +9,7 @@ declare(strict_types=1);
 namespace Drjele\Doctrine\Audit\EventSubscriber;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
@@ -24,6 +22,8 @@ use Throwable;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {
+    private static bool $typeRegistered = false;
+
     private AnnotationReadService $annotationReadService;
     private AuditorConfiguration $auditorConfiguration;
     private StorageConfiguration $storageConfiguration;
@@ -36,8 +36,6 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $this->annotationReadService = $annotationReadService;
         $this->auditorConfiguration = $auditorConfiguration;
         $this->storageConfiguration = $storageConfiguration;
-
-        Type::addType(OperationType::getDefaultName(), OperationType::class);
     }
 
     public function getSubscribedEvents()
@@ -50,81 +48,45 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
 
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs): void
     {
+        $this->registerType();
+
         $classMetadata = $eventArgs->getClassMetadata();
         $schema = $eventArgs->getSchema();
         $entityTable = $eventArgs->getClassTable();
 
         try {
-            /* remove original entity data */
-            $schema->dropTable($entityTable->getName());
-
             $entityDto = $this->annotationReadService->buildEntityDto($classMetadata);
             if (null === $entityDto) {
                 return;
             }
 
-            $notSupportedInheritance = [
-                ClassMetadataInfo::INHERITANCE_TYPE_NONE,
-                ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
-                ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
-            ];
-            if (!\in_array($classMetadata->inheritanceType, $notSupportedInheritance, true)) {
-                throw new Exception(
-                    \sprintf('inheritance type `%s` is not yet supported', $classMetadata->inheritanceType)
-                );
-            }
+            $table = $schema->getTable($entityTable->getName());
 
-            $auditTable = $schema->createTable($entityTable->getName());
-
-            $auditedColums = 0;
             foreach ($entityTable->getColumns() as $column) {
                 $columnName = $column->getName();
 
-                try {
-                    $field = $classMetadata->getFieldForColumn($columnName);
-                    if (\in_array($field, $entityDto->getIgnoredFields(), true)) {
-                        continue;
-                    }
-
-                    if (\in_array($field, $this->auditorConfiguration->getIgnoredFields(), true)) {
-                        continue;
-                    }
-
-                    $options = \array_merge(
-                        $column->getPlatformOptions(),
-                        [
-                            'notnull' => false,
-                            'autoincrement' => false,
-                        ]
-                    );
-                    unset($options['name'], $options['version']);
-
-                    /* @var Column $column */
-                    $auditTable->addColumn(
-                        $columnName,
-                        $column->getType()->getName(),
-                        $options
-                    );
-
-                    ++$auditedColums;
-                } catch (Throwable $t) {
-                    throw new Exception(
-                        \sprintf('`%s` => `%s`', $columnName, $t->getMessage()),
-                        $t->getCode(),
-                        $t
-                    );
+                $field = $classMetadata->getFieldForColumn($columnName);
+                if (\in_array($field, $entityDto->getIgnoredFields(), true)
+                    || \in_array($field, $this->auditorConfiguration->getIgnoredFields(), true)
+                ) {
+                    $table->dropColumn($columnName);
+                    continue;
                 }
+
+                $column->setAutoincrement(false);
             }
 
-            if (0 === $auditedColums) {
+            if (!$entityTable->getColumns()) {
+                $schema->dropTable($entityTable->getName());
+
                 return;
             }
 
-            $auditTable->addColumn(
+            $table->addColumn(
                 $this->storageConfiguration->getTransactionIdColumnName(),
                 $this->storageConfiguration->getTransactionIdColumnType()
             );
-            $auditTable->addColumn(
+            $table->addColumn(
                 $this->storageConfiguration->getOperationColumnName(),
                 OperationType::getDefaultName(),
                 ['notnull' => true]
@@ -132,9 +94,10 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
 
             $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
             $primaryKeyColumns[] = $this->storageConfiguration->getTransactionIdColumnName();
-            $auditTable->setPrimaryKey($primaryKeyColumns);
+            $entityTable->dropPrimaryKey();
+            $table->setPrimaryKey($primaryKeyColumns);
 
-            $auditTable->addIndex(
+            $table->addIndex(
                 [$this->storageConfiguration->getTransactionIdColumnName()],
                 $this->storageConfiguration->getTransactionIdColumnName()
             );
@@ -174,6 +137,18 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                     continue;
                 }
 
+                foreach ($table->getForeignKeys() as $foreignKey) {
+                    $table->removeForeignKey($foreignKey->getName());
+                }
+
+                foreach ($table->getIndexes() as $index) {
+                    $table->dropIndex($index->getName());
+                }
+
+                foreach ($table->getUniqueConstraints() as $uniqueConstraint) {
+                    $table->removeUniqueConstraint($uniqueConstraint->getName());
+                }
+
                 $table->addForeignKeyConstraint(
                     $this->storageConfiguration->getTransactionTableName(),
                     [$this->storageConfiguration->getTransactionIdColumnName()],
@@ -188,5 +163,16 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                 $t
             );
         }
+    }
+
+    private function registerType(): void
+    {
+        if (true === static::$typeRegistered) {
+            return;
+        }
+
+        Type::addType(OperationType::getDefaultName(), OperationType::class);
+
+        static::$typeRegistered = true;
     }
 }

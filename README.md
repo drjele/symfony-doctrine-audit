@@ -6,7 +6,14 @@ Any suggestions are welcomed.
 
 **This is a work in progress**. **ONLY WORKS AFTER TAG 2.1**.
 
-## Sample config
+## Todo
+
+* Unit tests.
+* Retain old values in case the values are changed directly from database.
+
+## Usage
+
+### Sample config and storage
 
 ```yaml
 drjele_doctrine_audit:
@@ -147,26 +154,12 @@ class AuditStorageService implements StorageInterface
 }
 ```
 
-## Doctrine storage
+### Doctrine storage
 
 This library will register two commands for each auditor with a **doctrine type storage**:
 
 * ``drjele:doctrine:audit:schema:create:<em-name>`` - will create the audit database schema for auditor **default**.
 * ``drjele:doctrine:audit:schema:update:<em-name>`` - will update the audit database schema for auditor **default**.
-
-## Todo
-
-* Unit tests.
-
-## Purpose
-
-* Use two step storage for failover and to not slow down the primary application thread.
-
-## Inspired by
-
-* https://github.com/xiidea/EasyAuditBundle
-* https://github.com/DamienHarper/auditor-bundle
-* https://github.com/sonata-project/EntityAuditBundle
 
 ## Dev
 
@@ -183,3 +176,9 @@ echo 'git config --global user.email "<your email>"' >> ./.profile_personal
 * `docker-compose build && docker-compose up -d`
 * `docker-compose exec php sh`
 * `composer install`
+
+## Inspired by
+
+* https://github.com/xiidea/EasyAuditBundle
+* https://github.com/DamienHarper/auditor-bundle
+* https://github.com/sonata-project/EntityAuditBundle
