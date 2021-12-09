@@ -11,14 +11,19 @@ Any suggestions are welcomed.
 ```yaml
 drjele_doctrine_audit:
     storages:
-        doctrine:
+        doctrine_one:
             type: doctrine
-            entity_manager: audit_em
+            entity_manager: audit_em_one
             config: # \Drjele\Doctrine\Audit\Storage\Doctrine\Configuration
                 transaction_table_name: 'audit_transaction'
         file:
             type: file
             file: '%kernel.project_dir%/var/audit.log'
+        doctrine_two:
+            type: doctrine
+            entity_manager: audit_em_two
+            config: # \Drjele\Doctrine\Audit\Storage\Doctrine\Configuration
+                transaction_table_name: 'audit_transaction'
         rabbit:
             type: custom
             service: Acme\Shared\Service\AuditStorageService
@@ -40,11 +45,75 @@ drjele_doctrine_audit:
         async:
             entity_manager: source_em_three
             storages:
-                - doctrine
+                - doctrine_two
                 - rabbit
             synchronous_storages:
-                - rabbit # the rabbit storage will publish the StorageDto and a consumer will be required to save to the doctrine storage
+                - rabbit # the rabbit storage will publish the storage dto and a consumer will be required to save to the doctrine storage
             transaction_provider: Acme\Shared\Service\AuditTransactionProviderService
+```
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Acme\Shared\Service;
+
+use Drjele\Doctrine\Audit\Contract\StorageInterface;
+use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
+use Drjele\Doctrine\Audit\Storage\Doctrine\Storage;
+use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
+use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\SerializerInterface;
+use Throwable;
+
+class AuditStorageService implements StorageInterface
+{
+    private SerializerInterface $serializer;
+    private Storage $storage;
+    private ProducerInterface $producer;
+    private LoggerInterface $logger;
+    private ThrowableHandlerService $throwableHandlerService;
+
+    public function __construct(
+        SerializerInterface $serializer,
+        Storage $storage,
+        ProducerInterface $auditProducer,
+        LoggerInterface $logger,
+        ThrowableHandlerService $throwableHandlerService
+    ) {
+        $this->serializer = $serializer;
+        $this->storage = $storage;
+        $this->producer = $auditProducer;
+        $this->logger = $logger;
+        $this->throwableHandlerService = $throwableHandlerService;
+    }
+
+    public function save(StorageDto $storageDto): void
+    {
+        try {
+            $message = $this->serializer->serialize($storageDto, JsonEncoder::FORMAT);
+
+            $this->producer->publish($message);
+        } catch (Throwable $t) {
+            $context = $this->throwableHandlerService->getContext($t);
+            /* @todo serialize by hand */
+            $context['dto'] = $message ?? 'could not serialize';
+
+            $this->logger->error($t->getMessage(), $context);
+        }
+    }
+
+    public function consume(AMQPMessage $message): void
+    {
+        /** @var StorageDto $storageDto */
+        $storageDto = $this->serializer->deserialize($message->getBody(), StorageDto::class, JsonEncoder::FORMAT);
+
+        $this->storage->save($storageDto);
+    }
+}
 ```
 
 ## Doctrine storage
@@ -57,7 +126,6 @@ This library will register two commands for each auditor with a **doctrine type 
 ## Todo
 
 * Unit tests.
-* catch updates done with \Doctrine\ORM\EntityManagerInterface::getReference.
 
 ## Purpose
 

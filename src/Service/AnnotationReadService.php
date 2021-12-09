@@ -27,6 +27,19 @@ class AnnotationReadService
         $this->reader = new AnnotationReader();
     }
 
+    public static function getEntityClass(object $class): string
+    {
+        $class = \is_object($class) ? \get_class($class) : $class;
+
+        $proxyString = '\\__CG__\\';
+        $proxyPosition = \mb_strrpos($class, $proxyString);
+        if (false !== $proxyPosition) {
+            return \mb_substr($class, $proxyPosition + \strlen($proxyString));
+        }
+
+        return $class;
+    }
+
     /** @return EntityDto[] */
     public function read(EntityManagerInterface $entityManager): array
     {

@@ -35,9 +35,10 @@ final class Auditor implements EventSubscriber
     private array $storages;
     private TransactionProviderInterface $transactionProvider;
     private ?LoggerInterface $logger;
+    private AnnotationReadService $annotationReadService;
 
     /** @var EntityDto[] */
-    private array $auditedEntities;
+    private ?array $auditedEntities;
     private ?AuditorDto $auditorDto;
 
     public function __construct(
@@ -53,9 +54,9 @@ final class Auditor implements EventSubscriber
         $this->storages = $storages;
         $this->transactionProvider = $transactionProvider;
         $this->logger = $logger;
+        $this->annotationReadService = $annotationReadService;
 
-        /* @todo read and set entities on cache create */
-        $this->auditedEntities = $annotationReadService->read($entityManager);
+        $this->auditedEntities = null;
         $this->auditorDto = null;
     }
 
@@ -69,6 +70,9 @@ final class Auditor implements EventSubscriber
         /* @todo compute updates transactions somewhere */
 
         try {
+            /* @todo only init the modified entities */
+            $this->auditedEntities ??= $this->annotationReadService->read($this->entityManager);
+
             $unitOfWork = $this->entityManager->getUnitOfWork();
 
             $entitiesToDelete = $this->filterAuditedEntities($unitOfWork->getScheduledEntityDeletions());
@@ -344,7 +348,7 @@ final class Auditor implements EventSubscriber
                 continue;
             }
 
-            if (!$this->isAudited(\get_class($entity))) {
+            if (!$this->isAudited(AnnotationReadService::getEntityClass($entity))) {
                 continue;
             }
 

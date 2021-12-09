@@ -13,9 +13,9 @@ final class FieldDto
     private string $name;
     private string $columnName;
     private string $type;
-    private $value;
+    private mixed $value;
 
-    public function __construct(string $name, string $columnName, string $type, $value)
+    public function __construct(string $name, string $columnName, string $type, mixed $value)
     {
         $this->name = $name;
         $this->columnName = $columnName;
@@ -38,7 +38,7 @@ final class FieldDto
         return $this->type;
     }
 
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->value;
     }
