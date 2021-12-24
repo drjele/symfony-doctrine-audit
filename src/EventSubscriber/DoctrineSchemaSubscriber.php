@@ -55,52 +55,60 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
         $entityTable = $eventArgs->getClassTable();
 
         try {
-            $entityDto = $this->annotationReadService->buildEntityDto($classMetadata);
-            if (null === $entityDto) {
-                return;
-            }
+            $auditable = false;
 
-            $table = $schema->getTable($entityTable->getName());
-
-            foreach ($entityTable->getColumns() as $column) {
-                $columnName = $column->getName();
-
-                $field = $classMetadata->getFieldForColumn($columnName);
-                if (\in_array($field, $entityDto->getIgnoredFields(), true)
-                    || \in_array($field, $this->auditorConfiguration->getIgnoredFields(), true)
-                ) {
-                    $table->dropColumn($columnName);
-                    continue;
+            try {
+                $entityDto = $this->annotationReadService->buildEntityDto($classMetadata);
+                if (null === $entityDto) {
+                    return;
                 }
 
-                $column->setAutoincrement(false);
+                $table = $schema->getTable($entityTable->getName());
+
+                foreach ($entityTable->getColumns() as $column) {
+                    $columnName = $column->getName();
+
+                    $field = $classMetadata->getFieldForColumn($columnName);
+                    if (\in_array($field, $entityDto->getIgnoredFields(), true)
+                        || \in_array($field, $this->auditorConfiguration->getIgnoredFields(), true)
+                    ) {
+                        $table->dropColumn($columnName);
+                        continue;
+                    }
+
+                    $column->setAutoincrement(false);
+                }
+
+                if (!$entityTable->getColumns()) {
+                    return;
+                }
+
+                $auditable = true;
+
+                $table->addColumn(
+                    $this->storageConfiguration->getTransactionIdColumnName(),
+                    $this->storageConfiguration->getTransactionIdColumnType()
+                );
+                $table->addColumn(
+                    $this->storageConfiguration->getOperationColumnName(),
+                    OperationType::getDefaultName(),
+                    ['notnull' => true]
+                );
+
+                $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
+                $primaryKeyColumns[] = $this->storageConfiguration->getTransactionIdColumnName();
+                $entityTable->dropPrimaryKey();
+                $table->setPrimaryKey($primaryKeyColumns);
+
+                $table->addIndex(
+                    [$this->storageConfiguration->getTransactionIdColumnName()],
+                    $this->storageConfiguration->getTransactionIdColumnName()
+                );
+            } finally {
+                if (false === $auditable) {
+                    $schema->dropTable($entityTable->getName());
+                }
             }
-
-            if (!$entityTable->getColumns()) {
-                $schema->dropTable($entityTable->getName());
-
-                return;
-            }
-
-            $table->addColumn(
-                $this->storageConfiguration->getTransactionIdColumnName(),
-                $this->storageConfiguration->getTransactionIdColumnType()
-            );
-            $table->addColumn(
-                $this->storageConfiguration->getOperationColumnName(),
-                OperationType::getDefaultName(),
-                ['notnull' => true]
-            );
-
-            $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
-            $primaryKeyColumns[] = $this->storageConfiguration->getTransactionIdColumnName();
-            $entityTable->dropPrimaryKey();
-            $table->setPrimaryKey($primaryKeyColumns);
-
-            $table->addIndex(
-                [$this->storageConfiguration->getTransactionIdColumnName()],
-                $this->storageConfiguration->getTransactionIdColumnName()
-            );
         } catch (Throwable $t) {
             throw new Exception(
                 \sprintf('`%s` => `%s`', $entityTable->getName(), $t->getMessage()),
