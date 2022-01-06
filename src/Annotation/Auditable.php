@@ -17,5 +17,5 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 final class Auditable extends Annotation
 {
-    public bool $value = true;
+    public $value = true;
 }

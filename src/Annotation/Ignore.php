@@ -17,5 +17,5 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 final class Ignore extends Annotation
 {
-    public bool $value = true;
+    public $value = true;
 }
