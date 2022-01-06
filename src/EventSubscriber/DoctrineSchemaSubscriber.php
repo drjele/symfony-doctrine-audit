@@ -17,13 +17,11 @@ use Drjele\Doctrine\Audit\Auditor\Configuration as AuditorConfiguration;
 use Drjele\Doctrine\Audit\Exception\Exception;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
 use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as StorageConfiguration;
-use Drjele\Doctrine\Audit\Type\OperationType;
+use Drjele\Doctrine\Audit\Type\AuditOperationType;
 use Throwable;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {
-    private const TYPE_NAME = 'DrjeleAuditOperationType';
-
     private static bool $typeRegistered = false;
 
     private AnnotationReadService $annotationReadService;
@@ -93,7 +91,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                 );
                 $table->addColumn(
                     $this->storageConfiguration->getOperationColumnName(),
-                    static::TYPE_NAME,
+                    AuditOperationType::class,
                     ['notnull' => true]
                 );
 
@@ -181,7 +179,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             return;
         }
 
-        Type::addType(static::TYPE_NAME, OperationType::class);
+        Type::addType(AuditOperationType::class, AuditOperationType::class);
 
         static::$typeRegistered = true;
     }

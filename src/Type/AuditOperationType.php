@@ -11,7 +11,7 @@ namespace Drjele\Doctrine\Audit\Type;
 use Drjele\Doctrine\Audit\Dto\Auditor\EntityDto;
 use Drjele\Doctrine\Type\Contract\AbstractEnumType;
 
-class OperationType extends AbstractEnumType
+class AuditOperationType extends AbstractEnumType
 {
     public function getValues(): array
     {
