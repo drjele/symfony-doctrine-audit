@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Drjele\Doctrine\Audit\Type;
 
 use Drjele\Doctrine\Audit\Dto\Auditor\EntityDto;
-use Drjele\Doctrine\Type\AbstractEnumType;
+use Drjele\Doctrine\Type\Contract\AbstractEnumType;
 
 class OperationType extends AbstractEnumType
 {

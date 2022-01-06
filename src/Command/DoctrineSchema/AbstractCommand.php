@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Input\InputOption;
 
-abstract class AbstractCommand extends \Drjele\Symfony\Command\Command\AbstractCommand
+abstract class AbstractCommand extends \Drjele\Symfony\Console\Command\AbstractCommand
 {
     protected const FORCE = 'force';
 
@@ -32,8 +32,6 @@ abstract class AbstractCommand extends \Drjele\Symfony\Command\Command\AbstractC
 
     protected function configure(): void
     {
-        parent::configure();
-
         $this->addOption(static::FORCE, null, InputOption::VALUE_NONE, 'run the sql');
     }
 

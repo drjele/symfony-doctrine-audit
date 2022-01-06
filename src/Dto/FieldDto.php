@@ -15,8 +15,12 @@ final class FieldDto
     private string $type;
     private mixed $value;
 
-    public function __construct(string $name, string $columnName, string $type, mixed $value)
-    {
+    public function __construct(
+        string $name,
+        string $columnName,
+        string $type,
+        mixed $value
+    ) {
         $this->name = $name;
         $this->columnName = $columnName;
         $this->type = $type;

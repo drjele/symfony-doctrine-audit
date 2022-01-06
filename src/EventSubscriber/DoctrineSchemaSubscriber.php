@@ -22,6 +22,8 @@ use Throwable;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {
+    private const TYPE_NAME = 'DrjeleAuditOperationType';
+
     private static bool $typeRegistered = false;
 
     private AnnotationReadService $annotationReadService;
@@ -91,7 +93,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                 );
                 $table->addColumn(
                     $this->storageConfiguration->getOperationColumnName(),
-                    OperationType::getDefaultName(),
+                    static::TYPE_NAME,
                     ['notnull' => true]
                 );
 
@@ -179,7 +181,7 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
             return;
         }
 
-        Type::addType(OperationType::getDefaultName(), OperationType::class);
+        Type::addType(static::TYPE_NAME, OperationType::class);
 
         static::$typeRegistered = true;
     }
