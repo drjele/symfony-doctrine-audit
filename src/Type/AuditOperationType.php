@@ -13,6 +13,11 @@ use Drjele\Doctrine\Type\Contract\AbstractEnumType;
 
 class AuditOperationType extends AbstractEnumType
 {
+    public static function getTypeName(): string
+    {
+        return (new self())->getName();
+    }
+
     public function getValues(): array
     {
         return EntityDto::OPERATIONS;
