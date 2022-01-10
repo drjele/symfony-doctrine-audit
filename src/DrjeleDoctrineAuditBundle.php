@@ -18,6 +18,8 @@ class DrjeleDoctrineAuditBundle extends Bundle
     {
         parent::boot();
 
-        Type::addType(AuditOperationType::getTypeName(), AuditOperationType::class);
+        if (false === Type::hasType(AuditOperationType::getTypeName())) {
+            Type::addType(AuditOperationType::getTypeName(), AuditOperationType::class);
+        }
     }
 }
