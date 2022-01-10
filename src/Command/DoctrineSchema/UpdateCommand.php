@@ -35,7 +35,7 @@ final class UpdateCommand extends AbstractCommand
             $sqls = $schemaTool->getUpdateSchemaSql($sourceMetadatas, true);
 
             foreach ($sqls as $sql) {
-                $this->io->writeln(\sprintf('    %s;', $sql));
+                $this->style->writeln(\sprintf('    %s;', $sql));
             }
 
             $this->writeln('----------------------------------------------------------------------');

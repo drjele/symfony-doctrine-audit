@@ -1074,16 +1074,16 @@
         },
         {
             "name": "drjele/symfony-console",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-symfony/console.git",
-                "reference": "bc3b72124c118cc6a22f366dd43e7d00a034bf34"
+                "reference": "dae8ef0fc7524bdb549120ecdef0b9a76b27b277"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fconsole/repository/archive.zip?sha=bc3b72124c118cc6a22f366dd43e7d00a034bf34",
-                "reference": "bc3b72124c118cc6a22f366dd43e7d00a034bf34",
+                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fconsole/repository/archive.zip?sha=dae8ef0fc7524bdb549120ecdef0b9a76b27b277",
+                "reference": "dae8ef0fc7524bdb549120ecdef0b9a76b27b277",
                 "shasum": ""
             },
             "require": {
@@ -1136,7 +1136,7 @@
             "support": {
                 "issues": "https://gitlab.com/api/v4/projects/32606112/issues"
             },
-            "time": "2022-01-06T13:40:53+00:00"
+            "time": "2022-01-10T16:13:49+00:00"
         },
         {
             "name": "psr/cache",

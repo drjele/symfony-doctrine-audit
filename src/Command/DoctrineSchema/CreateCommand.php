@@ -35,7 +35,7 @@ final class CreateCommand extends AbstractCommand
             $sqls = $schemaTool->getCreateSchemaSql($sourceMetadatas);
 
             foreach ($sqls as $sql) {
-                $this->io->writeln(\sprintf('    %s;', $sql));
+                $this->style->writeln(\sprintf('    %s;', $sql));
             }
 
             $this->writeln('----------------------------------------------------------------------');
