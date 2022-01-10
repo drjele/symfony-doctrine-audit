@@ -15,8 +15,10 @@ final class StorageDto
     /** @var EntityDto[] */
     private array $entities;
 
-    public function __construct(TransactionDto $transaction, array $entities)
-    {
+    public function __construct(
+        TransactionDto $transaction,
+        array $entities
+    ) {
         $this->transaction = $transaction;
         $this->entities = $entities;
     }

@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Drjele\Doctrine\Audit\EventSubscriber;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
@@ -22,8 +21,6 @@ use Throwable;
 
 final class DoctrineSchemaSubscriber implements EventSubscriber
 {
-    private static bool $typeRegistered = false;
-
     private AnnotationReadService $annotationReadService;
     private AuditorConfiguration $auditorConfiguration;
     private StorageConfiguration $storageConfiguration;
@@ -48,8 +45,6 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
 
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs): void
     {
-        $this->registerType();
-
         $classMetadata = $eventArgs->getClassMetadata();
         $schema = $eventArgs->getSchema();
         $entityTable = $eventArgs->getClassTable();
@@ -171,16 +166,5 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                 $t
             );
         }
-    }
-
-    private function registerType(): void
-    {
-        if (true === static::$typeRegistered) {
-            return;
-        }
-
-        Type::addType(AuditOperationType::getTypeName(), AuditOperationType::class);
-
-        static::$typeRegistered = true;
     }
 }

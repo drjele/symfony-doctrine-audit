@@ -13,8 +13,9 @@ final class TransactionDto
 {
     private string $username;
 
-    public function __construct(string $username)
-    {
+    public function __construct(
+        string $username
+    ) {
         $this->username = $username;
     }
 
