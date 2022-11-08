@@ -13,6 +13,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
+ *
  * @Target("PROPERTY")
  */
 final class Ignore extends Annotation

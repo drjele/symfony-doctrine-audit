@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\Storage\Doctrine;
 
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Drjele\Doctrine\Audit\Contract\StorageInterface;
@@ -49,7 +50,7 @@ final class Storage implements StorageInterface
             $this->configuration->getTransactionTableName(),
             [
                 'username' => $transactionDto->getUsername(),
-                'created' => new \DateTime(),
+                'created' => new DateTime(),
             ],
             [
                 Types::STRING,

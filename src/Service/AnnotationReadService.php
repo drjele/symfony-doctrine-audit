@@ -17,6 +17,7 @@ use Drjele\Doctrine\Audit\Annotation\Auditable;
 use Drjele\Doctrine\Audit\Annotation\Ignore;
 use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
 use Drjele\Doctrine\Audit\Exception\Exception;
+use ReflectionProperty;
 
 class AnnotationReadService
 {
@@ -111,7 +112,7 @@ class AnnotationReadService
         return new EntityDto($metadata->getName(), $ignoredFields);
     }
 
-    private function shouldIgnore(\ReflectionProperty $field): bool
+    private function shouldIgnore(ReflectionProperty $field): bool
     {
         /** @var Annotation $ignore */
         $ignore = $this->reader->getPropertyAnnotation($field, Ignore::class);

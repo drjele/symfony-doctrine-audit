@@ -13,6 +13,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
+ *
  * @Target("CLASS")
  */
 final class Auditable extends Annotation

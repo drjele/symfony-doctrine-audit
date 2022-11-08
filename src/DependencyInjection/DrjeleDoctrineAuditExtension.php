@@ -75,7 +75,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
         string $storageName
     ): void {
         $type = $storage['type'];
-        [$entityManager,] = $this->getEntityManagerAndConnection($storage);
+        [$entityManager] = $this->getEntityManagerAndConnection($storage);
 
         if (empty($entityManager)) {
             throw new Exception(
@@ -241,7 +241,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
         array $auditor,
         array $storage
     ): void {
-        [$auditorEntityManager,] = $this->getEntityManagerAndConnection($auditor);
+        [$auditorEntityManager] = $this->getEntityManagerAndConnection($auditor);
         [$storageEntityManager, $storageConnection] = $this->getEntityManagerAndConnection($storage);
 
         $auditorEntityManagerReference = $this->getEntityManager($auditorEntityManager);
