@@ -6,11 +6,6 @@ Any suggestions are welcomed.
 
 **This is a work in progress**. **ONLY WORKS AFTER TAG 2.1**.
 
-## Todo
-
-* Unit tests.
-* Retain old values in case the values are changed directly from database.
-
 ## Usage
 
 ### Sample config and storage
@@ -165,7 +160,7 @@ This library will register two commands for each auditor with a **doctrine type 
 
 ```shell
 git clone git@gitlab.com:drjele-symfony/doctrine-audit.git
-cd type/scripts/docker/
+cd doctrine-audit/scripts/docker/
 cp ~/.ssh/id_* ./
 
 echo 'git config --global user.name "<your name>"' >> ./.profile_personal && \
@@ -175,6 +170,11 @@ docker-compose build && docker-compose up -d
 docker-compose exec php sh
 composer install
 ```
+
+## Todo
+
+* Unit tests.
+* Retain old values in case the values are changed directly from database.
 
 ## Inspired by
 

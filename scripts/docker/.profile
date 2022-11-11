@@ -12,12 +12,14 @@ git config --global color.interactive auto
 git config --global color.status auto
 git config --global push.default current
 git config --global --add safe.directory /var/www/app
+git config --global init.defaultBranch master
 
 alias ll="ls -al"
 alias pfull="gpc && fix && punit && git st"
 alias gap="gpcu && git add . && pfull"
 alias gitnb=git_branch_new
 alias gitmb=git_branch_merge
+alias gaf="clear && git add . && fix && git st"
 
 git_branch_new() {
     if [[ -n "$1" && "$1" != ' ' && -n "$2" && "$2" != ' ' ]]; then
