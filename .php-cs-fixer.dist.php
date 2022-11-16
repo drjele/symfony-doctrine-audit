@@ -18,6 +18,9 @@ return (new PhpCsFixer\Config())
             'native_function_invocation' => ['include' => ['@all'], 'strict' => true],
             'single_line_throw' => false,
             'cast_spaces' => ['space' => 'none'],
+            'declare_strict_types' => true,
+            'strict_comparison' => true,
+            'strict_param' => true,
         ]
     )
     ->setRiskyAllowed(true)
