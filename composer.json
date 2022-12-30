@@ -30,6 +30,7 @@
     "require-dev": {
         "drjele/symfony-phpunit": "^4.0",
         "friendsofphp/php-cs-fixer": "^3.13",
+        "phpstan/phpstan": "^1.9",
         "squizlabs/php_codesniffer": "^3.7"
     },
     "autoload": {
@@ -57,15 +58,5 @@
     "prefer-stable": true,
     "config": {
         "sort-packages": true
-    },
-    "extra": {
-        "exclude": [
-            "/scripts",
-            "/tests",
-            "/.php-cs-fixer.dist.php",
-            "/.php_cs.dist",
-            "/phpcs.xml.dist",
-            "/phpunit.xml.dist"
-        ]
     }
 }

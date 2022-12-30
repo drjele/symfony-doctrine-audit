@@ -33,12 +33,10 @@ lint() {
 }
 
 code_sniffer() {
-    STAGED_FILES=$1
-
     section "start code sniffer"
     println ""
 
-    ./vendor/bin/phpcs --no-cache --encoding=utf-8 -n -p -v -s ${STAGED_FILES}
+    ./vendor/bin/phpcs --no-cache --encoding=utf-8 -n -p -v -s $1
 
     if [ $? != 0 ]; then
         error "fix the errors before commit"
