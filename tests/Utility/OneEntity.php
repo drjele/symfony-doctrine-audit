@@ -13,6 +13,7 @@ use Drjele\Doctrine\Audit\Annotation\Auditable;
 
 /**
  * @Auditable()
+ *
  * @ORM\Entity()
  */
 class OneEntity

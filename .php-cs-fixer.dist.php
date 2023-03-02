@@ -21,6 +21,7 @@ return (new PhpCsFixer\Config())
             'declare_strict_types' => true,
             'strict_comparison' => true,
             'strict_param' => true,
+            'phpdoc_separation' => ['groups' => [], 'skip_unlisted_annotations' => true]
         ]
     )
     ->setRiskyAllowed(true)

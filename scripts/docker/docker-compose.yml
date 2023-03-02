@@ -1,8 +1,0 @@
-version: '3.8'
-services:
-    php:
-        build: .
-        privileged: true
-        restart: unless-stopped
-        volumes:
-            - ../../:/var/www/app

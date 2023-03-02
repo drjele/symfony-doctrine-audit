@@ -14,6 +14,7 @@ use Drjele\Doctrine\Audit\Annotation\Ignore;
 
 /**
  * @Auditable()
+ *
  * @ORM\Entity()
  */
 class TwoEntity

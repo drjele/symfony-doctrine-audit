@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\Annotation;
 
+use Attribute;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 
@@ -16,6 +17,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  *
  * @Target("CLASS")
  */
+#[Attribute(Attribute::TARGET_CLASS)]
 final class Auditable extends Annotation
 {
     public $value = true;
