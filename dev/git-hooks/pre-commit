@@ -1,57 +1,43 @@
 #!/bin/bash
 
-run_in_container() {
-    ./dc exec -T php "$@"
-}
-
-error() {
-    println "\e[31m( $1 )\e[0m"
-}
-
-section() {
-    println "\e[33m[[\e[32m $1 \e[33m]]\e[0m"
-}
-
-println() {
-    printf %b "$1\n"
-}
+. "${PWD}/dev/utility.sh"
 
 stop() {
-    section "stop pre commit hook"
+    print_command "stop pre commit hook"
     exit $1
 }
 
 lint() {
     STAGED_FILES=$1
 
-    section "start php lint"
+    print_command "start php lint"
     println ""
 
     for FILE in ${STAGED_FILES}; do
         run_in_container php -l -d display_errors=0 "${FILE}"
 
         if [[ $? != 0 ]]; then
-            error "fix the error before commit"
+            print_error "fix the error before commit"
             stop 1
         fi
     done
 
     println ""
-    section "end php lint"
+    print_command "end php lint"
 }
 
 code_sniffer() {
-    section "start code sniffer"
+    print_command "start code sniffer"
     println ""
 
     run_in_container ./vendor/bin/phpcs --no-cache --encoding=utf-8 -n -p -v -s $1
 
     if [[ $? != 0 ]]; then
-        error "fix the errors before commit"
+        print_error "fix the errors before commit"
         stop 1
     fi
 
-    section "end code sniffer"
+    print_command "end code sniffer"
 }
 
 check_container() {
@@ -59,7 +45,12 @@ check_container() {
     PHP_IS_INSTALLED=$?
 
     if [[ "${PHP_IS_INSTALLED}" -ne 0 ]]; then
-        error "the dev container is not running"
+        println ""
+
+        print_error "the dev container is not running"
+
+        println ""
+
         stop 1
     fi
 }
@@ -68,7 +59,7 @@ check_container() {
 
 STAGED_FILES=$(git diff --cached --name-only)
 
-section "${PWD} start pre commit hook"
+print_command "${PWD} start pre commit hook"
 
 if [[ "${STAGED_FILES}" = "" ]]; then
     println "no files to commit"
@@ -78,18 +69,14 @@ fi
 
 println ""
 
-section "staged files start"
+print_command "staged files start"
 println "${STAGED_FILES}"
-section "staged files end"
-
-println ""
+print_command "staged files end"
 
 check_container
 
 STAGED_FILES_PHP=$(git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\.php)
 if [[ "${STAGED_FILES_PHP}" != "" ]]; then
-    println ""
-
     lint "${STAGED_FILES_PHP}"
 
     println ""
@@ -99,9 +86,9 @@ fi
 
 println ""
 
-section "staged files after hooks start"
+print_command "staged files after hooks start"
 println "$(git diff --cached --name-only)"
-section "staged files after hooks end"
+print_command "staged files after hooks end"
 
 println ""
 

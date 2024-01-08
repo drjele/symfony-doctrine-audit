@@ -20,4 +20,4 @@ else
     echo 'Already setup'
 fi
 
-php-fpm -F
+sleep infinity

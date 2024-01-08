@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [[ -f /var/www/html/dev/utility.sh ]]; then
+    . /var/www/html/dev/utility.sh
+fi
+
 if [[ -f ~/.bashrc ]]; then
     . ~/.bashrc
 fi
@@ -10,26 +14,6 @@ alias ll="ls -al"
 alias app="cd /var/www/html"
 
 alias full="clear && scomposer install && pfix && punit && pstan"
-
-gpci() {
-    clear && sgit pull && ci "$@" && sgit st
-}
-
-gpcu() {
-    clear && sgit pull && cu "$@" && sgit st
-}
-
-print_command() {
-    println "\e[33m[\e[32m $1 \e[33m]\e[0m"
-}
-
-print_error() {
-    println "\e[31m( $1 )\e[0m"
-}
-
-println() {
-    printf %b "$1\n"
-}
 # end generic
 
 # composer

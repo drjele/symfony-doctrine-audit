@@ -145,7 +145,7 @@ final class Auditor implements EventSubscriber
             );
 
             $entityDtos = $this->createAuditorEntityDtos(
-                $this->entityManager->getClassMetadata(\get_class($entity)),
+                $this->entityManager->getClassMetadata($entity::class),
                 $entityData,
                 $operation
             );
@@ -287,7 +287,7 @@ final class Auditor implements EventSubscriber
 
     private function getOriginalEntityData($entity)
     {
-        $class = $this->entityManager->getClassMetadata(\get_class($entity));
+        $class = $this->entityManager->getClassMetadata($entity::class);
         $data = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
 
         if ($class->isVersioned) {

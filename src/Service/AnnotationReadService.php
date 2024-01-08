@@ -30,7 +30,7 @@ class AnnotationReadService
 
     public static function getEntityClass(object $class): string
     {
-        $class = \is_object($class) ? \get_class($class) : $class;
+        $class = \is_object($class) ? $class::class : $class;
 
         $proxyString = '\\__CG__\\';
         $proxyPosition = \mb_strrpos($class, $proxyString);
