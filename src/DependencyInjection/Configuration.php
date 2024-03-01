@@ -20,7 +20,7 @@ final class Configuration implements ConfigurationInterface
     public const TYPE_FILE = 'file';
     public const TYPE_CUSTOM = 'custom';
 
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('drjele_doctrine_audit');
 
