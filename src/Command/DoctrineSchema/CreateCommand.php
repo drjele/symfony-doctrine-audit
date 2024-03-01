@@ -21,7 +21,7 @@ final class CreateCommand extends AbstractCommand
         $this->setDescription('create the database schema for the corresponding auditor');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->warning('careful when running this in a production environment');
