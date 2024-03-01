@@ -9,19 +9,9 @@ $finder = (new PhpCsFixer\Finder())
 return (new PhpCsFixer\Config())
     ->setRules(
         [
-            '@Symfony' => true,
-            '@Symfony:risky' => true,
+            '@PER-CS2.0' => true,
+            '@PER-CS2.0:risky' => true,
             'header_comment' => ['header' => $header],
-            'concat_space' => ['spacing' => 'one'],
-            'global_namespace_import' => ['import_classes' => true],
-            'native_constant_invocation' => ['include' => ['@all'], 'strict' => true],
-            'native_function_invocation' => ['include' => ['@all'], 'strict' => true],
-            'single_line_throw' => false,
-            'cast_spaces' => ['space' => 'none'],
-            'declare_strict_types' => true,
-            'strict_comparison' => true,
-            'strict_param' => true,
-            'phpdoc_separation' => ['groups' => [], 'skip_unlisted_annotations' => true]
         ]
     )
     ->setRiskyAllowed(true)

@@ -171,7 +171,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
             $this->defineAuditorConfig($containerBuilder, $auditorName, $auditor);
 
             $storages = \array_map(
-                fn (string $storage) => new Reference($this->getStorageId($storage)),
+                fn(string $storage) => new Reference($this->getStorageId($storage)),
                 $auditor['synchronous_storages']
             );
 
