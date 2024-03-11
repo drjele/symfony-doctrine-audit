@@ -8,14 +8,6 @@
 
     <rule ref="PSR12"/>
 
-    <rule ref="PSR2.Classes.ClassDeclaration.OpenBraceNewLine">
-        <exclude-pattern>*</exclude-pattern>
-    </rule>
-
-    <rule ref="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore">
-        <exclude-pattern>*</exclude-pattern>
-    </rule>
-
     <file>bin/</file>
     <file>config/</file>
     <file>public/</file>

@@ -12,11 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Drjele\Doctrine\Audit\Annotation\Auditable;
 use Drjele\Doctrine\Audit\Annotation\Ignore;
 
-/**
- * @Auditable()
- *
- * @ORM\Entity()
- */
+/** @Auditable() */
+#[ORM\Entity()]
 class TwoEntity
 {
     /** @Ignore() */

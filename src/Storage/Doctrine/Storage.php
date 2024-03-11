@@ -64,7 +64,7 @@ final class Storage implements StorageInterface
             ? $platform->getIdentitySequenceName($this->configuration->getTransactionIdColumnType(), 'id')
             : null;
 
-        return (int) $connection->lastInsertId($sequenceName);
+        return (int)$connection->lastInsertId($sequenceName);
     }
 
     private function saveEntity(int $transactionId, EntityDto $entityDto): void

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Drjele\Doctrine\Audit\Test\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
@@ -63,11 +64,13 @@ final class AnnotationReadServiceTest extends AbstractTestCase
         /** @var AnnotationReadService|MockInterface $mock */
         $mock = $this->get(AnnotationReadService::class);
 
+        $classMetadataFactoryMock = Mockery::mock(ClassMetadataFactory::class);
+
         $entityManagerInterfaceMock = Mockery::mock(EntityManagerInterface::class);
         $entityManagerInterfaceMock->shouldReceive('getMetadataFactory')
             ->once()
-            ->andReturnSelf();
-        $entityManagerInterfaceMock->shouldReceive('getAllMetadata')
+            ->andReturn($classMetadataFactoryMock);
+        $classMetadataFactoryMock->shouldReceive('getAllMetadata')
             ->once()
             ->andReturn([$metadataOne, $metadataTwo]);
 

@@ -11,11 +11,8 @@ namespace Drjele\Doctrine\Audit\Test\Utility;
 use Doctrine\ORM\Mapping as ORM;
 use Drjele\Doctrine\Audit\Annotation\Auditable;
 
-/**
- * @Auditable()
- *
- * @ORM\Entity()
- */
+/** @Auditable() */
+#[ORM\Entity()]
 class OneEntity
 {
     private int $id;
