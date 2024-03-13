@@ -8,10 +8,9 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\EventSubscriber;
 
-use Doctrine\Common\EventSubscriber;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
-use Doctrine\ORM\Tools\ToolEvents;
 use Drjele\Doctrine\Audit\Auditor\Configuration as AuditorConfiguration;
 use Drjele\Doctrine\Audit\Exception\Exception;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
@@ -19,29 +18,13 @@ use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as StorageConfiguration
 use Drjele\Doctrine\Audit\Type\AuditOperationType;
 use Throwable;
 
-final class DoctrineSchemaSubscriber implements EventSubscriber
+final class DoctrineSchemaListener
 {
-    private AnnotationReadService $annotationReadService;
-    private AuditorConfiguration $auditorConfiguration;
-    private StorageConfiguration $storageConfiguration;
-
     public function __construct(
-        AnnotationReadService $annotationReadService,
-        AuditorConfiguration $auditorConfiguration,
-        StorageConfiguration $storageConfiguration
-    ) {
-        $this->annotationReadService = $annotationReadService;
-        $this->auditorConfiguration = $auditorConfiguration;
-        $this->storageConfiguration = $storageConfiguration;
-    }
-
-    public function getSubscribedEvents()
-    {
-        return [
-            ToolEvents::postGenerateSchemaTable,
-            ToolEvents::postGenerateSchema,
-        ];
-    }
+        private readonly AnnotationReadService $annotationReadService,
+        private readonly AuditorConfiguration $auditorConfiguration,
+        private readonly StorageConfiguration $storageConfiguration
+    ) {}
 
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs): void
     {
@@ -130,8 +113,8 @@ final class DoctrineSchemaSubscriber implements EventSubscriber
                     'notnull' => true,
                 ]
             );
-            $transactionTable->addColumn('username', 'string')->setNotnull(false);
-            $transactionTable->addColumn('created', 'datetime');
+            $transactionTable->addColumn('username', Types::STRING, ['length' => 500])->setNotnull(false);
+            $transactionTable->addColumn('created', Types::DATETIME_IMMUTABLE);
 
             $transactionTable->setPrimaryKey(['id']);
 

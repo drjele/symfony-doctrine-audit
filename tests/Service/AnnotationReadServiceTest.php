@@ -9,12 +9,13 @@ declare(strict_types=1);
 namespace Drjele\Doctrine\Audit\Test\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata as MappingClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
-use Drjele\Doctrine\Audit\Test\Utility\OneEntity;
-use Drjele\Doctrine\Audit\Test\Utility\TwoEntity;
+use Drjele\Doctrine\Audit\Test\Entity\OneEntity;
+use Drjele\Doctrine\Audit\Test\Entity\TwoEntity;
 use Drjele\Symfony\Phpunit\MockDto;
 use Drjele\Symfony\Phpunit\TestCase\AbstractTestCase;
 use Mockery;
@@ -30,12 +31,32 @@ final class AnnotationReadServiceTest extends AbstractTestCase
     {
         return new MockDto(
             AnnotationReadService::class,
-            ['fakeParamToCallContructor'],
+            [],
             true
         );
     }
 
-    public function test(): void
+    public function testBuildEntityDto()
+    {
+        $entities = [
+            OneEntity::class => [],
+            TwoEntity::class => ['id', 'description'],
+        ];
+
+        /** @var AnnotationReadService|MockInterface $mock */
+        $mock = $this->get(AnnotationReadService::class);
+
+        foreach ($entities as $entity => $ignoredFields) {
+            $classMetadata = new MappingClassMetadata($entity);
+
+            $entityDto = $mock->buildEntityDto($classMetadata);
+
+            static::assertSame($entity, $entityDto->getClass());
+            static::assertSame($ignoredFields, $entityDto->getIgnoredFields());
+        }
+    }
+
+    public function testRead(): void
     {
         $metadataOne = Mockery::mock(ClassMetadata::class);
         $metadataOne->shouldReceive('getReflectionClass')

@@ -10,21 +10,14 @@ namespace Drjele\Doctrine\Audit\Dto\Auditor;
 
 final class AuditorDto
 {
-    private array $entitiesToDelete;
-    private array $entitiesToInsert;
-    private array $entitiesToUpdate;
-
     /** @var EntityDto[] */
     private array $auditEntities;
 
     public function __construct(
-        array $entitiesToDelete,
-        array $entitiesToInsert,
-        array $entitiesToUpdate
+        private readonly array $entitiesToDelete,
+        private readonly array $entitiesToInsert,
+        private readonly array $entitiesToUpdate
     ) {
-        $this->entitiesToDelete = $entitiesToDelete;
-        $this->entitiesToInsert = $entitiesToInsert;
-        $this->entitiesToUpdate = $entitiesToUpdate;
         $this->auditEntities = [];
     }
 

@@ -16,18 +16,12 @@ abstract class AbstractCommand extends \Drjele\Symfony\Console\Command\AbstractC
 {
     protected const FORCE = 'force';
 
-    protected EntityManagerInterface $sourceEntityManager;
-    protected EntityManagerInterface $destinationEntityManager;
-
     public function __construct(
         string $name,
-        EntityManagerInterface $sourceEntityManager,
-        EntityManagerInterface $destinationEntityManager
+        protected readonly EntityManagerInterface $sourceEntityManager,
+        protected readonly EntityManagerInterface $destinationEntityManager
     ) {
         parent::__construct($name);
-
-        $this->sourceEntityManager = $sourceEntityManager;
-        $this->destinationEntityManager = $destinationEntityManager;
     }
 
     protected function configure(): void

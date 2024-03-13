@@ -16,12 +16,9 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 final class FileStorage implements StorageInterface
 {
-    private string $file;
-
-    public function __construct(string $file)
-    {
-        $this->file = $file;
-    }
+    public function __construct(
+        private readonly string $file
+    ) {}
 
     public function save(StorageDto $storageDto): void
     {

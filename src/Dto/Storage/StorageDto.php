@@ -11,17 +11,10 @@ namespace Drjele\Doctrine\Audit\Dto\Storage;
 /** this and all of its children should be read only */
 final class StorageDto
 {
-    private TransactionDto $transaction;
-    /** @var EntityDto[] */
-    private array $entities;
-
     public function __construct(
-        TransactionDto $transaction,
-        array $entities
-    ) {
-        $this->transaction = $transaction;
-        $this->entities = $entities;
-    }
+        private readonly TransactionDto $transaction,
+        private readonly array $entities
+    ) {}
 
     public function getTransaction(): ?TransactionDto
     {

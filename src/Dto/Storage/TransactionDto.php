@@ -11,13 +11,9 @@ namespace Drjele\Doctrine\Audit\Dto\Storage;
 /** @todo add the option of extra data */
 final class TransactionDto
 {
-    private string $username;
-
     public function __construct(
-        string $username
-    ) {
-        $this->username = $username;
-    }
+        private readonly string $username
+    ) {}
 
     public function getUsername(): string
     {

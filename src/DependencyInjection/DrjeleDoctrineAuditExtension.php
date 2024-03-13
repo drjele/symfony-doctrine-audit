@@ -8,11 +8,13 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\DependencyInjection;
 
+use Doctrine\ORM\Events;
+use Doctrine\ORM\Tools\ToolEvents;
 use Drjele\Doctrine\Audit\Auditor\Auditor;
 use Drjele\Doctrine\Audit\Auditor\Configuration as AuditorConfig;
 use Drjele\Doctrine\Audit\Command\DoctrineSchema\CreateCommand;
 use Drjele\Doctrine\Audit\Command\DoctrineSchema\UpdateCommand;
-use Drjele\Doctrine\Audit\EventSubscriber\DoctrineSchemaSubscriber;
+use Drjele\Doctrine\Audit\EventSubscriber\DoctrineSchemaListener;
 use Drjele\Doctrine\Audit\Exception\Exception;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
 use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as DoctrineConfig;
@@ -187,7 +189,8 @@ final class DrjeleDoctrineAuditExtension extends Extension
                 ]
             );
 
-            $definition->addTag('doctrine.event_subscriber', ['connection' => $connection]);
+            $definition->addTag('doctrine.event_listener', ['connection' => $connection, 'event' => Events::onFlush])
+                ->addTag('doctrine.event_listener', ['connection' => $connection, 'event' => Events::postFlush]);
 
             $containerBuilder->setDefinition($this->getAuditorId($auditorName), $definition);
         }
@@ -278,7 +281,7 @@ final class DrjeleDoctrineAuditExtension extends Extension
         $defineCommand(UpdateCommand::class, 'update');
 
         $definition = new Definition(
-            DoctrineSchemaSubscriber::class,
+            DoctrineSchemaListener::class,
             [
                 new Reference(AnnotationReadService::class),
                 new Reference($this->getAuditorConfigId($auditorName)),
@@ -286,10 +289,11 @@ final class DrjeleDoctrineAuditExtension extends Extension
             ]
         );
 
-        $definition->addTag('doctrine.event_subscriber', ['connection' => $storageConnection]);
+        $definition->addTag('doctrine.event_listener', ['connection' => $storageConnection, 'event' => ToolEvents::postGenerateSchemaTable])
+            ->addTag('doctrine.event_listener', ['connection' => $storageConnection, 'event' => ToolEvents::postGenerateSchema]);
 
         $containerBuilder->setDefinition(
-            $this->getCommandId(\sprintf('schema:subscriber.%s.%s', $auditorName, $storageName)),
+            $this->getCommandId(\sprintf('schema:listener.%s.%s', $auditorName, $storageName)),
             $definition
         );
     }

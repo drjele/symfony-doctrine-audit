@@ -8,26 +8,18 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\Service;
 
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Drjele\Doctrine\Audit\Annotation\Auditable;
-use Drjele\Doctrine\Audit\Annotation\Ignore;
+use Drjele\Doctrine\Audit\Attribute\Auditable;
+use Drjele\Doctrine\Audit\Attribute\Ignore;
 use Drjele\Doctrine\Audit\Dto\Annotation\EntityDto;
 use Drjele\Doctrine\Audit\Exception\Exception;
+use ReflectionClass;
 use ReflectionProperty;
 
 class AnnotationReadService
 {
-    private AnnotationReader $reader;
-
-    public function __construct()
-    {
-        $this->reader = new AnnotationReader();
-    }
-
     public static function getEntityClass(object $class): string
     {
         $class = \is_object($class) ? $class::class : $class;
@@ -69,39 +61,32 @@ class AnnotationReadService
         return $entities;
     }
 
-    public function buildEntityDto(ClassMetadata $metadata): ?EntityDto
+    public function buildEntityDto(ClassMetadata $classMetadata): ?EntityDto
     {
-        $reflection = $metadata->getReflectionClass();
+        $reflectionClass = $classMetadata->getReflectionClass() ?? new ReflectionClass($classMetadata->getName());
 
-        $annotation = $this->reader->getClassAnnotation($reflection, Entity::class);
-        if (null === $annotation) {
+        if (false === $this->isEntity($reflectionClass)) {
             /* ignore non entity */
             return null;
         }
 
-        /** @var Auditable $auditableAnnotation */
-        $auditableAnnotation = $this->reader->getClassAnnotation($reflection, Auditable::class);
-        if (null === $auditableAnnotation) {
+        if (false === $this->isAuditable($reflectionClass)) {
             /* ignore not auditable entity */
-            return null;
-        }
-
-        if (false === $auditableAnnotation->value) {
             return null;
         }
 
         $ignoredFields = [];
 
-        foreach ($reflection->getProperties() as $property) {
+        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
             /* @todo add global ignore columns config */
 
-            if (true !== $this->shouldIgnore($property)) {
+            if (false === $this->isIgnored($reflectionProperty)) {
                 continue;
             }
 
-            $field = $property->getName();
+            $field = $reflectionProperty->getName();
 
-            if ($metadata->isIdentifier($field)) {
+            if ($classMetadata->isIdentifier($field)) {
                 /* identifiers are never ignored */
                 continue;
             }
@@ -109,18 +94,39 @@ class AnnotationReadService
             $ignoredFields[] = $field;
         }
 
-        return new EntityDto($metadata->getName(), $ignoredFields);
+        return new EntityDto($classMetadata->getName(), $ignoredFields);
     }
 
-    private function shouldIgnore(ReflectionProperty $field): bool
+    private function isAuditable(ReflectionClass $reflectionClass): bool
     {
-        /** @var Annotation $ignore */
-        $ignore = $this->reader->getPropertyAnnotation($field, Ignore::class);
+        $attributes = $reflectionClass->getAttributes(Auditable::class);
+        foreach ($attributes as $attribute) {
+            /** @var Auditable $auditable */
+            $auditable = $attribute->newInstance();
 
-        if (null === $ignore) {
-            return false;
+            return $auditable->enabled;
         }
 
-        return true === $ignore->value;
+        return false;
+    }
+
+    private function isEntity(ReflectionClass $reflectionClass): bool
+    {
+        $attributes = $reflectionClass->getAttributes(Entity::class);
+
+        return empty($attributes) === false;
+    }
+
+    private function isIgnored(ReflectionProperty $reflectionProperty): bool
+    {
+        $attributes = $reflectionProperty->getAttributes(Ignore::class);
+        foreach ($attributes as $attribute) {
+            /** @var Ignore $ignore */
+            $ignore = $attribute->newInstance();
+
+            return $ignore->enabled;
+        }
+
+        return false;
     }
 }

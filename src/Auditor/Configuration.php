@@ -10,12 +10,9 @@ namespace Drjele\Doctrine\Audit\Auditor;
 
 final class Configuration
 {
-    private array $ignoredFields;
-
-    public function __construct(array $ignoredFields)
-    {
-        $this->ignoredFields = $ignoredFields;
-    }
+    public function __construct(
+        private readonly array $ignoredFields
+    ) {}
 
     public function getIgnoredFields(): ?array
     {

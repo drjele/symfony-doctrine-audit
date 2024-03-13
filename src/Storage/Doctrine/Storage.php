@@ -18,20 +18,14 @@ use Drjele\Doctrine\Audit\Dto\Storage\TransactionDto;
 
 final class Storage implements StorageInterface
 {
-    private EntityManagerInterface $entityManager;
-    private Configuration $configuration;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        Configuration $configuration
-    ) {
-        $this->entityManager = $entityManager;
-        $this->configuration = $configuration;
-    }
+        private readonly EntityManagerInterface $entityManager,
+        private readonly Configuration $configuration
+    ) {}
 
     public function save(StorageDto $storageDto): void
     {
-        if (!$storageDto->getEntities()) {
+        if (true === empty($storageDto->getEntities())) {
             return;
         }
 
@@ -58,13 +52,7 @@ final class Storage implements StorageInterface
             ]
         );
 
-        $platform = $connection->getDatabasePlatform();
-
-        $sequenceName = $platform->supportsSequences()
-            ? $platform->getIdentitySequenceName($this->configuration->getTransactionIdColumnType(), 'id')
-            : null;
-
-        return (int)$connection->lastInsertId($sequenceName);
+        return (int)$connection->lastInsertId();
     }
 
     private function saveEntity(int $transactionId, EntityDto $entityDto): void

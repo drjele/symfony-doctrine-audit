@@ -6,12 +6,12 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\Doctrine\Audit\Test\Utility;
+namespace Drjele\Doctrine\Audit\Test\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Drjele\Doctrine\Audit\Annotation\Auditable;
+use Drjele\Doctrine\Audit\Attribute\Auditable;
 
-/** @Auditable() */
+#[Auditable(true)]
 #[ORM\Entity()]
 class OneEntity
 {

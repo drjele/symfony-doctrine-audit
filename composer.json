@@ -17,7 +17,6 @@
     ],
     "require": {
         "php": ">=8.2",
-        "doctrine/annotations": "^2.0",
         "doctrine/orm": "2.*|3.*|4.*",
         "drjele/doctrine-type": "4.*",
         "drjele/symfony-console": "3.*",

@@ -8,11 +8,9 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\Auditor;
 
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
-use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Drjele\Doctrine\Audit\Contract\StorageInterface;
 use Drjele\Doctrine\Audit\Contract\TransactionProviderInterface;
@@ -28,41 +26,22 @@ use Drjele\Doctrine\Audit\Service\AnnotationReadService;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final class Auditor implements EventSubscriber
+final class Auditor
 {
-    private Configuration $configuration;
-    private EntityManagerInterface $entityManager;
-    private array $storages;
-    private TransactionProviderInterface $transactionProvider;
-    private ?LoggerInterface $logger;
-    private AnnotationReadService $annotationReadService;
-
     /** @var EntityDto[] */
     private ?array $auditedEntities;
     private ?AuditorDto $auditorDto;
 
     public function __construct(
-        Configuration $configuration,
-        EntityManagerInterface $entityManager,
-        array $storages,
-        TransactionProviderInterface $transactionProvider,
-        ?LoggerInterface $logger,
-        AnnotationReadService $annotationReadService
+        private readonly Configuration $configuration,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly array $storages,
+        private readonly TransactionProviderInterface $transactionProvider,
+        private readonly ?LoggerInterface $logger,
+        private readonly AnnotationReadService $annotationReadService
     ) {
-        $this->configuration = $configuration;
-        $this->entityManager = $entityManager;
-        $this->storages = $storages;
-        $this->transactionProvider = $transactionProvider;
-        $this->logger = $logger;
-        $this->annotationReadService = $annotationReadService;
-
         $this->auditedEntities = null;
         $this->auditorDto = null;
-    }
-
-    public function getSubscribedEvents()
-    {
-        return [Events::onFlush, Events::postFlush];
     }
 
     public function onFlush(OnFlushEventArgs $eventArgs): void

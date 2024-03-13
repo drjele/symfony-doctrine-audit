@@ -6,22 +6,22 @@ declare(strict_types=1);
  * Copyright (c) Adrian Jeledintan
  */
 
-namespace Drjele\Doctrine\Audit\Test\Utility;
+namespace Drjele\Doctrine\Audit\Test\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Drjele\Doctrine\Audit\Annotation\Auditable;
-use Drjele\Doctrine\Audit\Annotation\Ignore;
+use Drjele\Doctrine\Audit\Attribute\Auditable;
+use Drjele\Doctrine\Audit\Attribute\Ignore;
 
-/** @Auditable() */
+#[Auditable()]
 #[ORM\Entity()]
 class TwoEntity
 {
-    /** @Ignore() */
+    #[Ignore()]
     private int $id;
 
     private string $name;
 
-    /** @Ignore() */
+    #[Ignore()]
     private string $description;
 
     public function getId(): int
