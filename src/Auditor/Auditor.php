@@ -21,13 +21,15 @@ use Drjele\Doctrine\Audit\Dto\Auditor\EntityDto as AuditorEntityDto;
 use Drjele\Doctrine\Audit\Dto\FieldDto;
 use Drjele\Doctrine\Audit\Dto\Storage\EntityDto as StorageEntityDto;
 use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
-use Drjele\Doctrine\Audit\Exception\Exception;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
+use Drjele\Doctrine\Audit\Trait\ThrowTrait;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
 final class Auditor
 {
+    use ThrowTrait;
+
     /** @var EntityDto[] */
     private ?array $auditedEntities;
     private ?AuditorDto $auditorDto;
@@ -157,11 +159,12 @@ final class Auditor
                 continue;
             }
 
-            if (!(($association['type'] & ClassMetadata::TO_ONE) > 0 && $association['isOwningSide'])) {
+            if (false === (($association['type'] & ClassMetadata::TO_ONE) > 0 && $association['isOwningSide'])) {
                 continue;
             }
 
             $data = $entityData[$field] ?? null;
+            $relatedId = null;
 
             if (null !== $data && $unitOfWork->isInIdentityMap($data)) {
                 $relatedId = $unitOfWork->getEntityIdentifier($data);
@@ -170,13 +173,12 @@ final class Auditor
             $targetClass = $this->entityManager->getClassMetadata($association['targetEntity']);
 
             foreach ($association['joinColumns'] as $joinColumn) {
-                $sourceColumn = $this->getJoinColumnName($joinColumn, $class);
+                $sourceColumn = $joinColumn['name'];
 
-                /** @todo refactor to not use deprecated method */
-                $targetColumn = $targetClass->getFieldForColumn($joinColumn['referencedColumnName']);
-                $type = $targetClass->getTypeOfColumn($targetColumn);
+                $targetFieldName = $targetClass->getFieldName($joinColumn['referencedColumnName']);
+                $type = $targetClass->getTypeOfField($targetFieldName);
 
-                $value = $relatedId[$targetColumn] ?? null;
+                $value = isset($relatedId) ? $relatedId[$targetFieldName] ?? null : null;
 
                 $auditorEntityDto->addField(
                     new FieldDto($field, $sourceColumn, $type, $value)
@@ -185,14 +187,14 @@ final class Auditor
         }
 
         foreach ($class->getFieldNames() as $field) {
-            if (true === $class->isInheritanceTypeJoined()
-                && true === $class->isInheritedField($field)
-                && false === $class->isIdentifier($field)) {
+            if ($class->isInheritanceTypeJoined() && $class->isInheritedField($field) && false === $class->isIdentifier($field)) {
                 continue;
             }
 
             $columnName = $this->getColumnName($field, $class);
-            $type = $class->getFieldMapping($field)['type'];
+
+            $fieldMapping = $class->getFieldMapping($field);
+            $type = $fieldMapping['type'];
             $value = $entityData[$field] ?? null;
 
             $auditorEntityDto->addField(
@@ -340,22 +342,5 @@ final class Auditor
     private function isAudited(string $entityClass): bool
     {
         return isset($this->auditedEntities[$entityClass]);
-    }
-
-    private function throw(Throwable $t): void
-    {
-        if ($this->logger) {
-            $this->logger->error(
-                $t->getMessage(),
-                [
-                    'code' => $t->getCode(),
-                    'file' => $t->getFile(),
-                    'line' => $t->getLine(),
-                    'trace' => $t->getTrace(),
-                ]
-            );
-        }
-
-        throw new Exception($t->getMessage(), $t->getCode(), $t);
     }
 }

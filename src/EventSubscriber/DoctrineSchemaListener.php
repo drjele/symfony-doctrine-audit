@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Drjele\Doctrine\Audit\EventSubscriber;
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
@@ -16,6 +18,8 @@ use Drjele\Doctrine\Audit\Exception\Exception;
 use Drjele\Doctrine\Audit\Service\AnnotationReadService;
 use Drjele\Doctrine\Audit\Storage\Doctrine\Configuration as StorageConfiguration;
 use Drjele\Doctrine\Audit\Type\AuditOperationType;
+use Drjele\Doctrine\Type\Contract\AbstractEnumType;
+use Drjele\Doctrine\Type\Contract\AbstractSetType;
 use Throwable;
 
 final class DoctrineSchemaListener
@@ -54,10 +58,13 @@ final class DoctrineSchemaListener
                         continue;
                     }
 
-                    $column->setAutoincrement(false);
+                    $column->setAutoincrement(false)
+                        ->setNotnull(false);
+
+                    $this->updateType($column);
                 }
 
-                if (!$entityTable->getColumns()) {
+                if (true === empty($entityTable->getColumns())) {
                     return;
                 }
 
@@ -148,6 +155,25 @@ final class DoctrineSchemaListener
                 $t->getCode(),
                 $t
             );
+        }
+    }
+
+    private function updateType(Column $column)
+    {
+        $columnType = $column->getType();
+
+        /** @todo maybe keep the original type and only add more values to the set */
+
+        switch (true) {
+            case $columnType instanceof AbstractEnumType:
+                $column->setType(Type::getType(Types::STRING))->setLength(100);
+                break;
+            case $columnType instanceof AbstractSetType:
+                $column->setType(Type::getType(Types::STRING))->setLength(100);
+                break;
+            default:
+                /** @todo handle other custom types */
+                break;
         }
     }
 }

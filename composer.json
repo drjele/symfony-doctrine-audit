@@ -1,5 +1,6 @@
 {
     "name": "drjele/doctrine-audit",
+    "version": "6.0.0",
     "type": "symfony-bundle",
     "description": "Doctrine audit library",
     "keywords": [
@@ -17,7 +18,7 @@
     ],
     "require": {
         "php": ">=8.2",
-        "doctrine/orm": "2.*|3.*|4.*",
+        "doctrine/orm": "3.*",
         "drjele/doctrine-type": "4.*",
         "drjele/symfony-console": "3.*",
         "symfony/config": "^4.0|^5.0|^6.0|^7.0",

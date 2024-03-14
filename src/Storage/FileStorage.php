@@ -11,22 +11,32 @@ namespace Drjele\Doctrine\Audit\Storage;
 use DateTime;
 use Drjele\Doctrine\Audit\Contract\StorageInterface;
 use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
+use Drjele\Doctrine\Audit\Trait\ThrowTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Throwable;
 
 final class FileStorage implements StorageInterface
 {
+    use ThrowTrait;
+
     public function __construct(
-        private readonly string $file
+        private readonly string $file,
+        private readonly ?LoggerInterface $logger,
     ) {}
 
     public function save(StorageDto $storageDto): void
     {
-        $transaction = $this->buildTransaction($storageDto);
+        try {
+            $transaction = $this->buildTransaction($storageDto);
 
-        $filesystem = new Filesystem();
+            $filesystem = new Filesystem();
 
-        $filesystem->appendToFile($this->file, $transaction . \PHP_EOL);
+            $filesystem->appendToFile($this->file, $transaction . \PHP_EOL);
+        } catch (Throwable $t) {
+            $this->throw($t);
+        }
     }
 
     private function buildTransaction(StorageDto $storageDto): string

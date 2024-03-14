@@ -52,6 +52,7 @@ final class Configuration implements ConfigurationInterface
             ->scalarNode('connection')->end()/* for doctrine */
             ->scalarNode('file')->end()/* for file */
             ->scalarNode('service')->end()/* for custom */
+            ->scalarNode('logger')->end()
             ->arrayNode('config')->scalarPrototype()->end()->end(); /* generic node with variable content for extra configs */
     }
 

@@ -87,11 +87,14 @@ final class DrjeleDoctrineAuditExtension extends Extension
 
         $this->defineStorageDoctrineConfig($containerBuilder, $storageName, $storage['config'] ?? []);
 
+        $logger = $auditor['logger'] ?? null;
+
         $definition = new Definition(
             Storage::class,
             [
                 $this->getEntityManager($entityManager),
                 new Reference($this->getStorageConfigId($storageName)),
+                null === $logger ? $logger : new Reference($logger),
             ]
         );
 
@@ -131,10 +134,13 @@ final class DrjeleDoctrineAuditExtension extends Extension
             );
         }
 
+        $logger = $auditor['logger'] ?? null;
+
         $definition = new Definition(
             FileStorage::class,
             [
                 $file,
+                null === $logger ? $logger : new Reference($logger),
             ]
         );
 

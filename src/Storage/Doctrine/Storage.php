@@ -15,12 +15,18 @@ use Drjele\Doctrine\Audit\Contract\StorageInterface;
 use Drjele\Doctrine\Audit\Dto\Storage\EntityDto;
 use Drjele\Doctrine\Audit\Dto\Storage\StorageDto;
 use Drjele\Doctrine\Audit\Dto\Storage\TransactionDto;
+use Drjele\Doctrine\Audit\Trait\ThrowTrait;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 final class Storage implements StorageInterface
 {
+    use ThrowTrait;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly Configuration $configuration
+        private readonly Configuration $configuration,
+        private readonly ?LoggerInterface $logger,
     ) {}
 
     public function save(StorageDto $storageDto): void
@@ -79,6 +85,10 @@ final class Storage implements StorageInterface
 
         $connection = $this->entityManager->getConnection();
 
-        $connection->executeStatement($sql, $values, $types);
+        try {
+            $connection->executeStatement($sql, $values, $types);
+        } catch (Throwable $t) {
+            $this->throw($t, ['sql' => $sql]);
+        }
     }
 }
