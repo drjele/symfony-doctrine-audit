@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "50cc63e07e59fe3efd4c3aa8c91422b1",
+    "content-hash": "9358721df21b8bcbb72da38f9dad45eb",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -3162,30 +3162,30 @@
         },
         {
             "name": "drjele/symfony-phpunit",
-            "version": "v5.2.0",
+            "version": "v5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-symfony/phpunit.git",
-                "reference": "c52550c5295ccae7f23563ac2336ea06033d9a55"
+                "reference": "f488c1657e94bbd63317c195c0dafa9ef0a8c062"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fphpunit/repository/archive.zip?sha=c52550c5295ccae7f23563ac2336ea06033d9a55",
-                "reference": "c52550c5295ccae7f23563ac2336ea06033d9a55",
+                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fphpunit/repository/archive.zip?sha=f488c1657e94bbd63317c195c0dafa9ef0a8c062",
+                "reference": "f488c1657e94bbd63317c195c0dafa9ef0a8c062",
                 "shasum": ""
             },
             "require": {
                 "mockery/mockery": "1.*",
                 "php": ">=8.2",
-                "symfony/phpunit-bridge": "^4.0|^5.0|^6.0|^7.0"
+                "symfony/phpunit-bridge": "7.*"
             },
             "require-dev": {
                 "doctrine/doctrine-bundle": "2.*",
-                "doctrine/orm": "2.*|3.*|4.*",
+                "doctrine/orm": "3.*",
                 "friendsofphp/php-cs-fixer": "3.*",
                 "phpstan/phpstan": "1.*",
                 "squizlabs/php_codesniffer": "3.*",
-                "symfony/framework-bundle": "^4.0|^5.0|^6.0|^7.0"
+                "symfony/framework-bundle": "7.*"
             },
             "type": "library",
             "autoload": {
@@ -3212,9 +3212,9 @@
             ],
             "support": {
                 "issues": "https://gitlab.com/drjele-symfony/phpunit/-/issues",
-                "source": "https://gitlab.com/drjele-symfony/phpunit/-/tree/v5.2.0"
+                "source": "https://gitlab.com/drjele-symfony/phpunit/-/tree/v5.3.0"
             },
-            "time": "2024-03-01T10:29:23+00:00"
+            "time": "2024-06-11T10:17:09+00:00"
         },
         {
             "name": "evenement/evenement",

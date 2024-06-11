@@ -1,7 +1,7 @@
 {
     "name": "drjele/doctrine-audit",
-    "version": "v6.1.0",
     "type": "symfony-bundle",
+    "version": "v6.1.1",
     "description": "Doctrine audit library",
     "keywords": [
         "doctrine",

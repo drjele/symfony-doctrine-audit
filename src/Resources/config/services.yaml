@@ -1,2 +1,0 @@
-services:
-    Drjele\Doctrine\Audit\Service\AnnotationReadService: ~
