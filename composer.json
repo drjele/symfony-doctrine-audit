@@ -1,7 +1,7 @@
 {
     "name": "drjele/doctrine-audit",
     "type": "symfony-bundle",
-    "version": "v6.1.1",
+    "version": "v6.1.2",
     "description": "Doctrine audit library",
     "keywords": [
         "doctrine",
@@ -22,7 +22,7 @@
         "doctrine/orm": "3.*",
         "doctrine/persistence": "3.*",
         "drjele/doctrine-type": "4.*",
-        "drjele/symfony-console": "3.*",
+        "drjele/symfony-console": "4.*",
         "symfony/config": "7.*",
         "symfony/console": "7.*",
         "symfony/dependency-injection": "7.*",

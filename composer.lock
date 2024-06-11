@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9358721df21b8bcbb72da38f9dad45eb",
+    "content-hash": "3b0f81887515512a9c96c90b3977b870",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -914,25 +914,25 @@
         },
         {
             "name": "drjele/symfony-console",
-            "version": "v3.3.0",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-symfony/console.git",
-                "reference": "3b25f112dc991a042df8b6d4c3c94496a6dfb18a"
+                "reference": "282c0c05084b62b5827d4c0314917320217bfaf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fconsole/repository/archive.zip?sha=3b25f112dc991a042df8b6d4c3c94496a6dfb18a",
-                "reference": "3b25f112dc991a042df8b6d4c3c94496a6dfb18a",
+                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fconsole/repository/archive.zip?sha=282c0c05084b62b5827d4c0314917320217bfaf3",
+                "reference": "282c0c05084b62b5827d4c0314917320217bfaf3",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
-                "symfony/config": "^4.0|^5.0|^6.0|^7.0",
-                "symfony/console": "^4.0|^5.0|^6.0|^7.0",
-                "symfony/dependency-injection": "^4.0|^5.0|^6.0|^7.0",
-                "symfony/filesystem": "^4.0|^5.0|^6.0|^7.0",
-                "symfony/http-kernel": "^4.0|^5.0|^6.0|^7.0"
+                "symfony/config": "7.*",
+                "symfony/console": "7.*",
+                "symfony/dependency-injection": "7.*",
+                "symfony/filesystem": "7.*",
+                "symfony/http-kernel": "7.*"
             },
             "require-dev": {
                 "drjele/symfony-phpunit": "5.*",
@@ -966,9 +966,9 @@
             ],
             "support": {
                 "issues": "https://gitlab.com/drjele-symfony/console/-/issues",
-                "source": "https://gitlab.com/drjele-symfony/console/-/tree/v3.3.0"
+                "source": "https://gitlab.com/drjele-symfony/console/-/tree/v4.0.0"
             },
-            "time": "2024-03-01T10:36:06+00:00"
+            "time": "2024-06-11T10:43:09+00:00"
         },
         {
             "name": "psr/cache",
@@ -3162,16 +3162,16 @@
         },
         {
             "name": "drjele/symfony-phpunit",
-            "version": "v5.3.0",
+            "version": "v5.4.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/drjele-symfony/phpunit.git",
-                "reference": "f488c1657e94bbd63317c195c0dafa9ef0a8c062"
+                "reference": "389bec4eebfd45cfed78b8ea567073fdcd229061"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fphpunit/repository/archive.zip?sha=f488c1657e94bbd63317c195c0dafa9ef0a8c062",
-                "reference": "f488c1657e94bbd63317c195c0dafa9ef0a8c062",
+                "url": "https://gitlab.com/api/v4/projects/drjele-symfony%2Fphpunit/repository/archive.zip?sha=389bec4eebfd45cfed78b8ea567073fdcd229061",
+                "reference": "389bec4eebfd45cfed78b8ea567073fdcd229061",
                 "shasum": ""
             },
             "require": {
@@ -3212,9 +3212,9 @@
             ],
             "support": {
                 "issues": "https://gitlab.com/drjele-symfony/phpunit/-/issues",
-                "source": "https://gitlab.com/drjele-symfony/phpunit/-/tree/v5.3.0"
+                "source": "https://gitlab.com/drjele-symfony/phpunit/-/tree/v5.4.0"
             },
-            "time": "2024-06-11T10:17:09+00:00"
+            "time": "2024-06-11T10:29:29+00:00"
         },
         {
             "name": "evenement/evenement",
