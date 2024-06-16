@@ -49,7 +49,7 @@ final class CreateCommand extends AbstractCommand
                 $this->success('database schema created successfully');
             }
         } catch (Throwable $t) {
-            $this->error($t->getMessage());
+            $this->error($t->getMessage(), $t, true);
 
             return static::FAILURE;
         }

@@ -49,7 +49,7 @@ final class UpdateCommand extends AbstractCommand
                 $this->success('database schema updated successfully');
             }
         } catch (Throwable $t) {
-            $this->error($t->getMessage());
+            $this->error($t->getMessage(), $t, true);
 
             return static::FAILURE;
         }

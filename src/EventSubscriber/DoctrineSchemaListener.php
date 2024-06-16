@@ -82,7 +82,20 @@ final class DoctrineSchemaListener
 
                 $primaryKeyColumns = $entityTable->getPrimaryKey()->getColumns();
                 $primaryKeyColumns[] = $this->storageConfiguration->getTransactionIdColumnName();
-                $entityTable->dropPrimaryKey();
+
+                foreach ($table->getForeignKeys() as $foreignKey) {
+                    $table->removeForeignKey($foreignKey->getName());
+                }
+
+                $table->dropPrimaryKey();
+                foreach ($table->getIndexes() as $index) {
+                    $table->dropIndex($index->getName());
+                }
+
+                foreach ($table->getUniqueConstraints() as $uniqueConstraint) {
+                    $table->removeUniqueConstraint($uniqueConstraint->getName());
+                }
+
                 $table->setPrimaryKey($primaryKeyColumns);
 
                 $table->addIndex(
@@ -130,18 +143,6 @@ final class DoctrineSchemaListener
                     continue;
                 }
 
-                foreach ($table->getForeignKeys() as $foreignKey) {
-                    $table->removeForeignKey($foreignKey->getName());
-                }
-
-                foreach ($table->getIndexes() as $index) {
-                    $table->dropIndex($index->getName());
-                }
-
-                foreach ($table->getUniqueConstraints() as $uniqueConstraint) {
-                    $table->removeUniqueConstraint($uniqueConstraint->getName());
-                }
-
                 $table->addForeignKeyConstraint(
                     $this->storageConfiguration->getTransactionTableName(),
                     [$this->storageConfiguration->getTransactionIdColumnName()],
@@ -166,10 +167,10 @@ final class DoctrineSchemaListener
 
         switch (true) {
             case $columnType instanceof AbstractEnumType:
-                $column->setType(Type::getType(Types::STRING))->setLength(100);
+                $column->setType(Type::getType(Types::STRING))->setLength(255);
                 break;
             case $columnType instanceof AbstractSetType:
-                $column->setType(Type::getType(Types::STRING))->setLength(100);
+                $column->setType(Type::getType(Types::STRING))->setLength(255);
                 break;
             default:
                 /** @todo handle other custom types */
