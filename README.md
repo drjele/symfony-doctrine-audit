@@ -1,5 +1,7 @@
 # Doctrine audit library
 
+**NO LONGER MAINTAINED, MOVED TO https://gitlab.com/precision-soft-open-source/symfony/doctrine-audit**
+
 **You may fork and modify it as you wish**.
 
 Any suggestions are welcomed.
